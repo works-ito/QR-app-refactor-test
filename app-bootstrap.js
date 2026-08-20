@@ -1,4 +1,4 @@
-/* QR在庫管理 Refactor integration bootstrap v9 */
+/* QR在庫管理 Refactor integration bootstrap v14 */
 (function() {
   "use strict";
 
@@ -32,11 +32,8 @@
     });
   }
 
-  /*
-   * 共通基盤は最優先で読み込む。
-   * 機能モジュールが失敗しても、在庫更新と受付セッション制御は残す。
-   */
   const foundationModules = [
+    "./startup-watchdog.js?v=1",
     "./inventory.js?v=3",
     "./runtime-control.js?v=3"
   ];
@@ -85,7 +82,7 @@
           failures
         );
       } else {
-        console.info("refactor: bootstrap v9 読込完了");
+        console.info("refactor: bootstrap v14 読込完了");
       }
     });
 })();
