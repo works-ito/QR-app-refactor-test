@@ -1,0 +1,73 @@
+name: Finalize quantity refactor
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Apply refactor edits
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          app = Path('app.js')
+          text = app.read_text(encoding='utf-8')
+          needle = '''          data.sourceQuantityLogId =
+            record.sourceQuantityLogId || "";'''
+          replacement = needle + '''\n          data.sourceLocation =\n            String(record.sourceLocation || "").trim();'''
+          count = text.count(needle)
+          if count != 2:
+              raise SystemExit(f'app.js sourceQuantityLogId occurrence mismatch: {count}')
+          text = text.replace(needle, replacement)
+          app.write_text(text, encoding='utf-8')
+
+          qt = Path('quantity-transfer.js')
+          q = qt.read_text(encoding='utf-8')
+          start_marker = '''  /*\n   * TODO: app-core 側の正式payload生成へ移すまでの互換補正。'''
+          end_marker = '''  function clearTransferSelections() {'''
+          start = q.find(start_marker)
+          end = q.find(end_marker)
+          if start < 0 or end < 0 or end <= start:
+              raise SystemExit('quantity-transfer.js wrapper block markers not found')
+          q = q[:start] + '''  /* sourceLocation は app.js の正式payload生成で保持する。 */\n\n''' + q[end:]
+          q = q.replace('    patchPreparedRecords();\n    patchBatchRecordBuilder();\n', '')
+          if 'patchPreparedRecords' in q or 'patchBatchRecordBuilder' in q:
+              raise SystemExit('quantity wrapper functions still remain')
+          qt.write_text(q, encoding='utf-8')
+
+          boot = Path('app-bootstrap.js')
+          b = boot.read_text(encoding='utf-8')
+          b = b.replace('Refactor integration bootstrap v5', 'Refactor integration bootstrap v6')
+          b = b.replace('./quantity-transfer.js?v=1', './quantity-transfer.js?v=2')
+          boot.write_text(b, encoding='utf-8')
+          PY
+
+      - name: Syntax check
+        run: |
+          node --check app.js
+          node --check quantity-transfer.js
+          node --check irregular-send.js
+          node --check sales-stockin-module.js
+          node --check runtime-control.js
+          node --check app-bootstrap.js
+
+      - name: Remove one-time workflow
+        run: rm -f .github/workflows/finalize-quantity-refactor.yml
+
+      - name: Commit checkpoint
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app.js quantity-transfer.js app-bootstrap.js .github/workflows/finalize-quantity-refactor.yml
+          git commit -m "Finalize quantity transfer payload path"
+          git push
