@@ -4,7 +4,7 @@
  * Responsibilities:
  * - inventory refresh scheduling
  * - visibility return refresh
- * - manual full refresh UI
+ * - manual in-place refresh UI
  * - inventory refresh timestamp display
  * - pending refresh after one reception session finishes
  *
@@ -93,6 +93,25 @@
     status.className = "inventoryDataStatus isReady";
   }
 
+  function renderRefreshFailure(message) {
+    const status = document.getElementById(STATUS_ID);
+    if (!status) return;
+
+    const hasCachedData =
+      typeof appInitialDataLoaded !== "undefined" &&
+      appInitialDataLoaded === true;
+
+    status.textContent = hasCachedData
+      ? "在庫データ：更新失敗・前回データを使用"
+      : "在庫データ：取得失敗";
+
+    if (message) {
+      status.title = String(message);
+    }
+
+    status.className = "inventoryDataStatus isError";
+  }
+
   function wasRecentlyRefreshed() {
     return (
       lastInventoryRefreshAt > 0 &&
@@ -158,8 +177,53 @@
     }
 
     pendingInventoryRefresh = true;
+    renderRefreshFailure(
+      typeof appInitialDataError !== "undefined"
+        ? appInitialDataError
+        : ""
+    );
     console.warn("在庫データ自動更新失敗", reason || "");
     return false;
+  }
+
+  async function runManualRefresh(button, status) {
+    if (button.disabled) return;
+
+    if (typeof loadAppInitialData !== "function") {
+      renderRefreshFailure("在庫データ更新関数を確認できません");
+      return;
+    }
+
+    button.disabled = true;
+    button.textContent = "更新中…";
+    if (status) {
+      status.textContent = "在庫データ：最新データを再取得中…";
+      status.className = "inventoryDataStatus isLoading";
+    }
+
+    try {
+      const success = await loadAppInitialData(false);
+
+      if (success) {
+        markRefreshSuccess();
+        return;
+      }
+
+      renderRefreshFailure(
+        typeof appInitialDataError !== "undefined"
+          ? appInitialDataError
+          : ""
+      );
+    } catch (error) {
+      renderRefreshFailure(
+        error && error.message
+          ? error.message
+          : String(error)
+      );
+    } finally {
+      button.disabled = false;
+      button.textContent = "更新";
+    }
   }
 
   function installControlledTimer() {
@@ -231,19 +295,6 @@
     }, PENDING_CHECK_MS);
   }
 
-  function runFullRefresh(button, status) {
-    if (button.disabled) return;
-
-    button.disabled = true;
-    button.textContent = "更新中…";
-    if (status) status.textContent = "在庫データ：更新中…";
-
-    const url = new URL(window.location.href);
-    url.search = "";
-    url.searchParams.set("appRefresh", String(Date.now()));
-    window.location.replace(url.toString());
-  }
-
   function installManualRefreshUi() {
     const status = document.getElementById(STATUS_ID);
     if (!status) {
@@ -265,7 +316,7 @@
     button.type = "button";
     button.textContent = "更新";
     button.addEventListener("click", function() {
-      runFullRefresh(button, status);
+      void runManualRefresh(button, status);
     });
     row.appendChild(button);
 
@@ -336,9 +387,11 @@
 
   window.InventoryControl = {
     requestRefresh:requestRefresh,
+    runManualRefresh:runManualRefresh,
     runPendingAfterSession:runPendingAfterSession,
     markRefreshSuccess:markRefreshSuccess,
-    renderRefreshTimestamp:renderRefreshTimestamp
+    renderRefreshTimestamp:renderRefreshTimestamp,
+    renderRefreshFailure:renderRefreshFailure
   };
 
   if (document.readyState === "loading") {
