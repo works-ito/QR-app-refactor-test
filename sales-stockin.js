@@ -1,8 +1,16 @@
-/* Legacy compatibility shim for refactor branch. */
+/* Legacy compatibility shim for refactor repository. */
 (function() {
   "use strict";
+
+  const REFACTOR_BUILD = "B10";
+
+  const title = document.querySelector(".brandTitle");
+  if (title) {
+    title.textContent = "QR在庫管理・リファクターテスト " + REFACTOR_BUILD;
+  }
+
   const script = document.createElement("script");
-  script.src = "./app-bootstrap.js?v=1";
+  script.src = "./app-bootstrap.js?v=10";
   script.onerror = function() {
     console.error("リファクタ版 app-bootstrap.js の読み込みに失敗しました");
   };
