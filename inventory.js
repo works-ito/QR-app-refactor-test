@@ -4,7 +4,7 @@
  * Responsibilities:
  * - inventory refresh scheduling
  * - visibility return refresh
- * - manual in-place refresh UI
+ * - manual full-page refresh UI
  * - inventory refresh timestamp display
  * - pending refresh after one reception session finishes
  *
@@ -186,44 +186,20 @@
     return false;
   }
 
-  async function runManualRefresh(button, status) {
+  function runFullRefresh(button, status) {
     if (button.disabled) return;
-
-    if (typeof loadAppInitialData !== "function") {
-      renderRefreshFailure("在庫データ更新関数を確認できません");
-      return;
-    }
 
     button.disabled = true;
     button.textContent = "更新中…";
     if (status) {
-      status.textContent = "在庫データ：最新データを再取得中…";
+      status.textContent = "在庫データ：更新中…";
       status.className = "inventoryDataStatus isLoading";
     }
 
-    try {
-      const success = await loadAppInitialData(false);
-
-      if (success) {
-        markRefreshSuccess();
-        return;
-      }
-
-      renderRefreshFailure(
-        typeof appInitialDataError !== "undefined"
-          ? appInitialDataError
-          : ""
-      );
-    } catch (error) {
-      renderRefreshFailure(
-        error && error.message
-          ? error.message
-          : String(error)
-      );
-    } finally {
-      button.disabled = false;
-      button.textContent = "更新";
-    }
+    const url = new URL(window.location.href);
+    url.search = "";
+    url.searchParams.set("appRefresh", String(Date.now()));
+    window.location.replace(url.toString());
   }
 
   function installControlledTimer() {
@@ -316,7 +292,7 @@
     button.type = "button";
     button.textContent = "更新";
     button.addEventListener("click", function() {
-      void runManualRefresh(button, status);
+      runFullRefresh(button, status);
     });
     row.appendChild(button);
 
@@ -387,7 +363,7 @@
 
   window.InventoryControl = {
     requestRefresh:requestRefresh,
-    runManualRefresh:runManualRefresh,
+    runFullRefresh:runFullRefresh,
     runPendingAfterSession:runPendingAfterSession,
     markRefreshSuccess:markRefreshSuccess,
     renderRefreshTimestamp:renderRefreshTimestamp,
