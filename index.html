@@ -12,7 +12,7 @@
     <header class="appHeader">
       <div class="brand">
         <div class="brandTitle">
-          QR在庫管理 B13
+          QR在庫管理・開発版
         </div>
 
         <div class="brandSub">
@@ -21,144 +21,687 @@
       </div>
 
       <div class="headerActions">
-        <button id="headerBackButton" class="headerBackButton hidden" type="button">戻る</button>
-        <button id="restartButton" class="restartButton" type="button">最初から</button>
+        <button
+          id="headerBackButton"
+          class="headerBackButton hidden"
+          type="button"
+        >
+          戻る
+        </button>
+
+        <button
+          id="restartButton"
+          class="restartButton"
+          type="button"
+        >
+          最初から
+        </button>
       </div>
     </header>
 
-    <div id="inventoryDataStatus" class="inventoryDataStatus isLoading" aria-live="polite">在庫データ：確認中</div>
-    <div id="progress" class="progress" aria-label="設定の進行状況">
-      <div class="progressStep"></div><div class="progressStep"></div><div class="progressStep"></div><div class="progressStep"></div><div class="progressStep"></div>
+    <div
+      id="inventoryDataStatus"
+      class="inventoryDataStatus isLoading"
+      aria-live="polite"
+    >
+      在庫データ：確認中
     </div>
-    <div id="selectionSummary" class="selectionSummary isEmpty" aria-live="polite"></div>
 
-    <section id="receptionStep" class="panel" aria-labelledby="receptionQuestion">
-      <div class="stepLabel">START</div>
-      <h1 id="receptionQuestion" class="question">受付方法を選んでください</h1>
-      <p class="questionHint">管理QRの状態に合わせて選択します</p>
+    <div
+      id="progress"
+      class="progress"
+      aria-label="設定の進行状況"
+    >
+      <div class="progressStep"></div>
+      <div class="progressStep"></div>
+      <div class="progressStep"></div>
+      <div class="progressStep"></div>
+      <div class="progressStep"></div>
+    </div>
+
+    <div
+      id="selectionSummary"
+      class="selectionSummary isEmpty"
+      aria-live="polite"
+    ></div>
+
+    <section
+      id="receptionStep"
+      class="panel"
+      aria-labelledby="receptionQuestion"
+    >
+      <div class="stepLabel">
+        START
+      </div>
+
+      <h1
+        id="receptionQuestion"
+        class="question"
+      >
+        受付方法を選んでください
+      </h1>
+
+      <p class="questionHint">
+        管理QRの状態に合わせて選択します
+      </p>
+
       <div class="buttonGrid singleColumn">
-        <button class="choiceButton" type="button" data-reception-type="normal">通常受付<span class="choiceSubText">管理QRをカメラで読み取る</span></button>
-        <button class="choiceButton" type="button" data-reception-type="irregular" data-kind="special">イレギュラー受付<span class="choiceSubText">管理QRなし・破損・読取不可</span></button>
+        <button
+          class="choiceButton"
+          type="button"
+          data-reception-type="normal"
+        >
+          通常受付
+
+          <span class="choiceSubText">
+            管理QRをカメラで読み取る
+          </span>
+        </button>
+
+        <button
+          class="choiceButton"
+          type="button"
+          data-reception-type="irregular"
+          data-kind="special"
+        >
+          イレギュラー受付
+
+          <span class="choiceSubText">
+            管理QRなし・破損・読取不可
+          </span>
+        </button>
+      </div>
+    </section>
+    <section
+  id="previousStep"
+  class="panel"
+>
+
+  <div class="stepHeader">
+
+    <div class="stepLabel">
+      前回設定
+    </div>
+
+    <div
+      id="previousReceptionStatus"
+      class="receptionStatus"
+    >
+      通常受付
+    </div>
+
+  </div>
+
+  <h1 class="question">
+    前回の設定を確認してください
+  </h1>
+
+  <p class="questionHint">
+    拠点と担当者だけ前回の設定を使用できます
+  </p>
+
+  <div class="previousCard">
+
+    <p class="previousLead">
+      前回は次の設定でした。
+    </p>
+
+    <dl class="previousSettings">
+
+      <dt>拠点</dt>
+      <dd id="previousLocationDisplay"></dd>
+
+      <dt>担当者</dt>
+      <dd id="previousUserDisplay"></dd>
+
+    </dl>
+
+    <p class="previousQuestion">
+      今回もこの設定で進めますか？
+    </p>
+
+  </div>
+
+  <div class="buttonGrid singleColumn">
+
+    <button
+      id="usePreviousSettingsButton"
+      class="nextButton"
+      type="button"
+    >
+      このまま進む
+    </button>
+
+    <button
+      id="changePreviousSettingsButton"
+      class="backButton"
+      type="button"
+    >
+      変更する
+    </button>
+
+  </div>
+
+</section>
+    <section
+      id="modeStep"
+      class="panel"
+      aria-labelledby="modeQuestion"
+    >
+      <div class="stepHeader">
+        <div class="stepLabel">
+          STEP 1
+        </div>
+
+        <div
+          class="receptionStatus"
+          data-reception-status
+        >
+          通常受付
+        </div>
+      </div>
+
+      <h1
+        id="modeQuestion"
+        class="question"
+      >
+        作業区分を選んでください
+      </h1>
+
+      <p class="questionHint">
+        今から行う作業を1つ選択します。長押しで説明を確認できます
+      </p>
+
+      <div
+        id="modeDescriptionPopup"
+        class="modeDescriptionPopup"
+        role="status"
+        aria-live="polite"
+        hidden
+      >
+        <strong id="modeDescriptionTitle"></strong>
+        <span id="modeDescriptionText"></span>
+      </div>
+
+      <div
+        id="modeButtons"
+        class="buttonGrid"
+      ></div>
+    </section>
+
+    <section
+      id="locationStep"
+      class="panel"
+      aria-labelledby="locationQuestion"
+    >
+      <div class="stepHeader">
+        <div class="stepLabel">
+          STEP 2
+        </div>
+
+        <div
+          class="receptionStatus"
+          data-reception-status
+        >
+          通常受付
+        </div>
+      </div>
+
+      <h1
+        id="locationQuestion"
+        class="question"
+      >
+        実施拠点を選んでください
+      </h1>
+
+      <p class="questionHint">
+        作業を実施している拠点を選択します
+      </p>
+
+      <div
+        id="locationButtons"
+        class="buttonGrid singleColumn"
+      ></div>
+    </section>
+
+    <section
+      id="userStep"
+      class="panel"
+      aria-labelledby="userQuestion"
+    >
+      <div class="stepHeader">
+        <div class="stepLabel">
+          STEP 3
+        </div>
+
+        <div
+          class="receptionStatus"
+          data-reception-status
+        >
+          通常受付
+        </div>
+      </div>
+
+      <h1
+        id="userQuestion"
+        class="question"
+      >
+        担当者を選んでください
+      </h1>
+
+      <p class="questionHint">
+        今回の作業者を選択します
+      </p>
+
+      <div
+        id="userButtons"
+        class="buttonGrid"
+      ></div>
+    </section>
+
+    <section
+      id="recStep"
+      class="panel"
+      aria-labelledby="recQuestion"
+    >
+      <div class="stepHeader">
+        <div class="stepLabel">
+          追加設定
+        </div>
+
+        <div
+          class="receptionStatus"
+          data-reception-status
+        >
+          通常受付
+        </div>
+      </div>
+
+      <h1
+        id="recQuestion"
+        class="question"
+      >
+        REC対象を選んでください
+      </h1>
+
+      <p class="questionHint">
+        対象を選び、必要な場合は実施日を入力します
+      </p>
+
+      <div
+        id="recTargetButtons"
+        class="buttonGrid"
+      ></div>
+
+      <div
+        id="wizardRecDateBox"
+        class="dateBox hidden"
+      >
+        <label
+          id="wizardRecDateLabel"
+          class="dateLabel"
+          for="wizardRecDate"
+        >
+          実施日
+        </label>
+
+        <input
+          id="wizardRecDate"
+          class="dateInput"
+          type="date"
+        >
+
+        <button
+          id="confirmRecButton"
+          class="nextButton"
+          type="button"
+        >
+          この内容で次へ
+        </button>
       </div>
     </section>
 
-    <section id="previousStep" class="panel">
-      <div class="stepHeader"><div class="stepLabel">前回設定</div><div id="previousReceptionStatus" class="receptionStatus">通常受付</div></div>
-      <h1 class="question">前回の設定を確認してください</h1>
-      <p class="questionHint">拠点と担当者だけ前回の設定を使用できます</p>
-      <div class="previousCard">
-        <p class="previousLead">前回は次の設定でした。</p>
-        <dl class="previousSettings"><dt>拠点</dt><dd id="previousLocationDisplay"></dd><dt>担当者</dt><dd id="previousUserDisplay"></dd></dl>
-        <p class="previousQuestion">今回もこの設定で進めますか？</p>
+    <section
+      id="completeStep"
+      class="panel"
+      aria-labelledby="completeTitle"
+    >
+      <div class="completeCard">
+        <h1
+          id="completeTitle"
+          class="completeTitle"
+        >
+          設定完了
+        </h1>
+
+        <dl
+          id="completeList"
+          class="completeList"
+        ></dl>
       </div>
-      <div class="buttonGrid singleColumn">
-        <button id="usePreviousSettingsButton" class="nextButton" type="button">このまま進む</button>
-        <button id="changePreviousSettingsButton" class="backButton" type="button">変更する</button>
-      </div>
-    </section>
 
-    <section id="modeStep" class="panel" aria-labelledby="modeQuestion">
-      <div class="stepHeader"><div class="stepLabel">STEP 1</div><div class="receptionStatus" data-reception-status>通常受付</div></div>
-      <h1 id="modeQuestion" class="question">作業区分を選んでください</h1>
-      <p class="questionHint">今から行う作業を1つ選択します。長押しで説明を確認できます</p>
-      <div id="modeDescriptionPopup" class="modeDescriptionPopup" role="status" aria-live="polite" hidden><strong id="modeDescriptionTitle"></strong><span id="modeDescriptionText"></span></div>
-      <div id="modeButtons" class="buttonGrid"></div>
-    </section>
-
-    <section id="locationStep" class="panel" aria-labelledby="locationQuestion">
-      <div class="stepHeader"><div class="stepLabel">STEP 2</div><div class="receptionStatus" data-reception-status>通常受付</div></div>
-      <h1 id="locationQuestion" class="question">実施拠点を選んでください</h1>
-      <p class="questionHint">作業を実施している拠点を選択します</p>
-      <div id="locationButtons" class="buttonGrid singleColumn"></div>
-    </section>
-
-    <section id="userStep" class="panel" aria-labelledby="userQuestion">
-      <div class="stepHeader"><div class="stepLabel">STEP 3</div><div class="receptionStatus" data-reception-status>通常受付</div></div>
-      <h1 id="userQuestion" class="question">担当者を選んでください</h1>
-      <p class="questionHint">今回の作業者を選択します</p>
-      <div id="userButtons" class="buttonGrid"></div>
-    </section>
-
-    <section id="recStep" class="panel" aria-labelledby="recQuestion">
-      <div class="stepHeader"><div class="stepLabel">追加設定</div><div class="receptionStatus" data-reception-status>通常受付</div></div>
-      <h1 id="recQuestion" class="question">REC対象を選んでください</h1>
-      <p class="questionHint">対象を選び、必要な場合は実施日を入力します</p>
-      <div id="recTargetButtons" class="buttonGrid"></div>
-      <div id="wizardRecDateBox" class="dateBox hidden">
-        <label id="wizardRecDateLabel" class="dateLabel" for="wizardRecDate">実施日</label>
-        <input id="wizardRecDate" class="dateInput" type="date">
-        <button id="confirmRecButton" class="nextButton" type="button">この内容で次へ</button>
-      </div>
-    </section>
-
-    <section id="completeStep" class="panel" aria-labelledby="completeTitle">
-      <div class="completeCard"><h1 id="completeTitle" class="completeTitle">設定完了</h1><dl id="completeList" class="completeList"></dl></div>
       <div id="cameraPreview" class="scannerArea">
-        <div id="scannerStatus" class="scannerStatus">カメラ起動準備中…</div>
-        <div id="scannerViewport" class="scannerViewport"><video id="scannerVideo" class="scannerVideo" playsinline muted></video><div id="scannerFrame" class="scannerFrame"></div></div>
-        <div id="scannerQuantityInput" class="scannerQuantityInput">
-          <div id="scannerQuantityName" class="scannerQuantityName"></div><div id="scannerQuantityInfo" class="scannerQuantityInfo"></div>
-          <div id="scannerQuantityCheckoutBox" class="scannerQuantityCheckoutBox" hidden><label for="scannerQuantityCheckoutSelect">取消対象の出庫履歴</label><select id="scannerQuantityCheckoutSelect"></select><div id="scannerQuantityCheckoutStatus" class="scannerQuantityCheckoutStatus"></div></div>
-          <div class="scannerQuantityField"><input id="scannerQuantityValue" type="number" inputmode="numeric" min="1" step="1" placeholder="数量"><span id="scannerQuantityUnit" class="scannerQuantityUnit"></span></div>
-          <div class="scannerQuantityActions"><button id="cancelQuantityButton" class="scannerQuantityCancelButton" type="button">取消</button><button id="addQuantityButton" class="scannerQuantityAddButton" type="button">一覧へ追加</button></div>
+        <div id="scannerStatus" class="scannerStatus">
+          カメラ起動準備中…
         </div>
-        <div id="scannerResult" class="scannerResult"><div class="scannerResultTitle"><span>読取済み</span><span id="scannerResultCount">0件</span></div><ol id="scannerResultList" class="scannerResultList"></ol></div>
-        <button id="cancelLastScanButton" class="scannerReadActionButton scannerUndoButton" type="button">最後の1件を取消</button>
-        <button id="resetAllScansButton" class="scannerReadActionButton scannerResetAllButton" type="button">読取をすべてリセット</button>
-        <div id="wizardReturnMemoArea" class="wizardReturnMemoArea" hidden>
-          <h3>返却案件の追記</h3><div class="irregularNoteEmphasis">欠油・未入庫・破損状況は必ず入力</div><p>今回の返却全体に追記する内容を選んでください。</p>
-          <label class="wizardReturnMemoOption"><input type="radio" name="wizardReturnMemoType" value="なし"><span>追記なし</span></label>
-          <label class="wizardReturnMemoOption"><input type="radio" name="wizardReturnMemoType" value="あり"><span>追記あり</span></label>
-          <textarea id="wizardReturnMemoText" placeholder="例：欠油○L／○○未入庫1／カバー破損" hidden></textarea>
-          <button id="wizardConfirmReturnMemoButton" type="button">この内容で返却を送信</button><button id="wizardCancelReturnMemoButton" class="secondaryButton" type="button">戻る</button>
+
+        <div id="scannerViewport" class="scannerViewport">
+          <video
+            id="scannerVideo"
+            class="scannerVideo"
+            playsinline
+            muted
+          ></video>
+
+          <div id="scannerFrame" class="scannerFrame"></div>
         </div>
-        <button id="wizardSendBatchButton" class="wizardSendButton" type="button">読取分をまとめて送信</button>
-        <div id="wizardSendStatus" class="wizardSendStatus" role="status" aria-live="polite"></div>
-        <button id="wizardCancelSendButton" class="wizardCancelSendButton" type="button">直前送信を取消（5分間有効）</button>
+
+        <div
+          id="scannerQuantityInput"
+          class="scannerQuantityInput"
+        >
+          <div
+            id="scannerQuantityName"
+            class="scannerQuantityName"
+          ></div>
+
+          <div
+            id="scannerQuantityInfo"
+            class="scannerQuantityInfo"
+          ></div>
+
+          <div
+            id="scannerQuantityCheckoutBox"
+            class="scannerQuantityCheckoutBox"
+            hidden
+          >
+            <label for="scannerQuantityCheckoutSelect">
+              取消対象の出庫履歴
+            </label>
+
+            <select id="scannerQuantityCheckoutSelect"></select>
+
+            <div
+              id="scannerQuantityCheckoutStatus"
+              class="scannerQuantityCheckoutStatus"
+            ></div>
+          </div>
+
+          <div class="scannerQuantityField">
+            <input
+              id="scannerQuantityValue"
+              type="number"
+              inputmode="numeric"
+              min="1"
+              step="1"
+              placeholder="数量"
+            >
+
+            <span
+              id="scannerQuantityUnit"
+              class="scannerQuantityUnit"
+            ></span>
+          </div>
+
+          <div class="scannerQuantityActions">
+            <button
+              id="cancelQuantityButton"
+              class="scannerQuantityCancelButton"
+              type="button"
+            >
+              取消
+            </button>
+
+            <button
+              id="addQuantityButton"
+              class="scannerQuantityAddButton"
+              type="button"
+            >
+              一覧へ追加
+            </button>
+          </div>
+        </div>
+
+        <div id="scannerResult" class="scannerResult">
+          <div class="scannerResultTitle">
+            <span>読取済み</span>
+            <span id="scannerResultCount">0件</span>
+          </div>
+
+          <ol id="scannerResultList" class="scannerResultList"></ol>
+        </div>
+
+        <button
+          id="cancelLastScanButton"
+          class="scannerReadActionButton scannerUndoButton"
+          type="button"
+        >
+          最後の1件を取消
+        </button>
+
+        <button
+          id="resetAllScansButton"
+          class="scannerReadActionButton scannerResetAllButton"
+          type="button"
+        >
+          読取をすべてリセット
+        </button>
+
+        <div
+          id="wizardReturnMemoArea"
+          class="wizardReturnMemoArea"
+          hidden
+        >
+          <h3>返却案件の追記</h3>
+          <div class="irregularNoteEmphasis">
+            欠油・未入庫・破損状況は必ず入力
+          </div>
+          <p>今回の返却全体に追記する内容を選んでください。</p>
+
+          <label class="wizardReturnMemoOption">
+            <input
+              type="radio"
+              name="wizardReturnMemoType"
+              value="なし"
+            >
+            <span>追記なし</span>
+          </label>
+
+          <label class="wizardReturnMemoOption">
+            <input
+              type="radio"
+              name="wizardReturnMemoType"
+              value="あり"
+            >
+            <span>追記あり</span>
+          </label>
+
+          <textarea
+            id="wizardReturnMemoText"
+            placeholder="例：欠油○L／○○未入庫1／カバー破損"
+            hidden
+          ></textarea>
+
+          <button
+            id="wizardConfirmReturnMemoButton"
+            type="button"
+          >
+            この内容で返却を送信
+          </button>
+
+          <button
+            id="wizardCancelReturnMemoButton"
+            class="secondaryButton"
+            type="button"
+          >
+            戻る
+          </button>
+        </div>
+
+        <button
+          id="wizardSendBatchButton"
+          class="wizardSendButton"
+          type="button"
+        >
+          読取分をまとめて送信
+        </button>
+
+        <div
+          id="wizardSendStatus"
+          class="wizardSendStatus"
+          role="status"
+          aria-live="polite"
+        ></div>
+
+        <button
+          id="wizardCancelSendButton"
+          class="wizardCancelSendButton"
+          type="button"
+        >
+          直前送信を取消（5分間有効）
+        </button>
+
       </div>
 
       <div id="quantityInspectionArea" class="quantityInspectionArea" hidden>
-        <div class="quantityInspectionGuide"><h2>数量管理品の検品</h2><p>返却された未検品品を、完成機と全損廃棄に振り分けます。</p><p class="quantityInspectionWarning">QR読取は不要です。品目を選び、完成数と廃棄数を入力してください。</p></div>
-        <label for="quantityInspectionItemSelect">検品する品目</label><select id="quantityInspectionItemSelect"></select><button id="quantityInspectionAddButton" type="button">この品目を追加</button>
-        <div id="quantityInspectionEmpty" class="quantityInspectionEmpty">この拠点に未検品の数量管理品はありません。</div><div id="quantityInspectionRows" class="quantityInspectionRows"></div>
-        <button id="quantityInspectionSendButton" class="wizardSendButton" type="button">検品結果をまとめて送信</button>
-        <div id="quantityInspectionStatus" class="wizardSendStatus" role="status" aria-live="polite"></div>
-        <button id="quantityInspectionCancelSendButton" class="wizardCancelSendButton" type="button">直前送信を取消（5分間有効）</button>
-      </div>
-      <p id="connectionNote" class="connectionNote">本番接続時は、この画面に到達した直後にカメラを自動起動します。</p>
-    </section>
+        <div class="quantityInspectionGuide">
+          <h2>数量管理品の検品</h2>
+          <p>返却された未検品品を、完成機と全損廃棄に振り分けます。</p>
+          <p class="quantityInspectionWarning">QR読取は不要です。品目を選び、完成数と廃棄数を入力してください。</p>
+        </div>
 
-    <section id="wizardPostSendArea" class="wizardPostSendArea" hidden>
-      <div id="wizardIrregularArea" class="wizardPostCard" hidden>
-        <h3>イレギュラー受付内容</h3>
-        <div class="wizardRadioGrid"><label><input type="radio" name="wizardIrregularNumberType" value="入力" checked>番号を入力する</label><label><input type="radio" name="wizardIrregularNumberType" value="番号不明">番号が読めない</label></div>
-        <label for="wizardIrregularNumber">管理番号または品目コード</label><input id="wizardIrregularNumber" type="text" autocomplete="off" placeholder="管理番号または品目コードを入力">
-        <div class="wizardRadioGrid"><label><input type="radio" name="wizardIrregularSlipStatus" value="伝票あり" checked>伝票あり</label><label><input type="radio" name="wizardIrregularSlipStatus" value="伝票なし">伝票なし</label></div>
-        <div id="wizardIrregularSlipGuide" class="wizardPostSummary">1枚目に伝票写真を追加してください。</div>
-        <label for="wizardIrregularNote">状況・理由</label><div class="irregularNoteEmphasis">欠油・未入庫・破損状況などを必ず入力</div><textarea id="wizardIrregularNote" placeholder="QR破損・汚れ・管理番号が読めない・機械の特徴などを必ず入力"></textarea>
-        <div id="wizardIrregularQuantityBox" hidden><label for="wizardIrregularQuantity">数量</label><input id="wizardIrregularQuantity" type="number" inputmode="numeric" min="1" step="1" placeholder="数量"><div id="wizardIrregularQuantityUnit" class="wizardPostSummary"></div></div>
-        <div id="wizardIrregularCheckResult" class="wizardPostSummary"></div>
-        <button type="button" id="wizardConfirmIrregularButton">入力内容を確認して写真へ進む</button><button type="button" id="wizardCancelIrregularButton" class="secondaryButton">イレギュラー受付を取消</button>
+        <label for="quantityInspectionItemSelect">検品する品目</label>
+        <select id="quantityInspectionItemSelect"></select>
+        <button id="quantityInspectionAddButton" type="button">この品目を追加</button>
+
+        <div id="quantityInspectionEmpty" class="quantityInspectionEmpty">
+          この拠点に未検品の数量管理品はありません。
+        </div>
+        <div id="quantityInspectionRows" class="quantityInspectionRows"></div>
+
+        <button id="quantityInspectionSendButton" class="wizardSendButton" type="button">
+          検品結果をまとめて送信
+        </button>
+        <div id="quantityInspectionStatus" class="wizardSendStatus" role="status" aria-live="polite"></div>
+        <button id="quantityInspectionCancelSendButton" class="wizardCancelSendButton" type="button">
+          直前送信を取消（5分間有効）
+        </button>
       </div>
-      <div id="wizardRecMemoArea" class="wizardPostCard" hidden><h3>REC追記</h3><div id="wizardRecMemoTarget" class="wizardPostSummary"></div><textarea id="wizardRecMemoText" placeholder="発送日・発送先・証明書待ち等"></textarea><button type="button" id="wizardSaveRecMemoButton">追記を保存</button><button type="button" id="wizardSkipRecMemoButton" class="secondaryButton">追記なしで完了</button></div>
-      <div id="wizardPhotoArea" class="wizardPostCard" hidden><h3 id="wizardPhotoHeading">写真の添付</h3><p>1枚目は伝票写真を選択してください。顧客名・現場名の自動取得に使用します。</p><div id="wizardPhotoSummary" class="wizardPostSummary"></div><input id="wizardPhotoCameraInput" type="file" accept="image/*" capture="environment" hidden><input id="wizardPhotoLibraryInput" type="file" accept="image/*" multiple hidden><button type="button" id="wizardPhotoCameraButton">カメラで撮影</button><button type="button" id="wizardPhotoLibraryButton">ライブラリから選ぶ</button><button type="button" id="wizardClearPhotosButton" class="secondaryButton">選択写真をクリア</button><div id="wizardPhotoPreview" class="wizardPostSummary">写真はまだ選択されていません。</div><button type="button" id="wizardSavePhotosButton" hidden>写真を保存</button><button type="button" id="wizardSkipPhotosButton" class="secondaryButton">写真なしで完了</button></div>
-      <div id="wizardPhotoTitleArea" class="wizardPostCard" hidden><h3>保存タイトルを確認してください</h3><div id="wizardPhotoTitleCandidate" class="wizardTitleCandidate">タイトル未取得</div><label for="wizardPhotoCustomerName">顧客名</label><input id="wizardPhotoCustomerName" type="text" autocomplete="off" placeholder="顧客名"><label for="wizardPhotoSiteName">現場名</label><input id="wizardPhotoSiteName" type="text" autocomplete="off" placeholder="現場名"><button type="button" id="wizardConfirmPhotoTitleButton">このタイトルで保存</button><button type="button" id="wizardBackToPhotosButton" class="secondaryButton">写真選択画面へ戻る</button></div>
-      <button id="wizardPostSendCancelButton" class="wizardCancelSendButton" type="button">直前送信を取消（残り約5分）</button>
+
+      <p
+        id="connectionNote"
+        class="connectionNote"
+      >
+        本番接続時は、この画面に到達した直後にカメラを自動起動します。
+      </p>
+
     </section>
+  <!-- 送信後の写真・REC追記フロー -->
+  <section id="wizardPostSendArea" class="wizardPostSendArea" hidden>
+    <div id="wizardIrregularArea" class="wizardPostCard" hidden>
+      <h3>イレギュラー受付内容</h3>
+      <div class="wizardRadioGrid">
+        <label><input type="radio" name="wizardIrregularNumberType" value="入力" checked>番号を入力する</label>
+        <label><input type="radio" name="wizardIrregularNumberType" value="番号不明">番号が読めない</label>
+      </div>
+      <label for="wizardIrregularNumber">管理番号または品目コード</label>
+      <input id="wizardIrregularNumber" type="text" autocomplete="off" placeholder="管理番号または品目コードを入力">
+      <div class="wizardRadioGrid">
+        <label><input type="radio" name="wizardIrregularSlipStatus" value="伝票あり" checked>伝票あり</label>
+        <label><input type="radio" name="wizardIrregularSlipStatus" value="伝票なし">伝票なし</label>
+      </div>
+      <div id="wizardIrregularSlipGuide" class="wizardPostSummary">1枚目に伝票写真を追加してください。</div>
+      <label for="wizardIrregularNote">状況・理由</label>
+      <div class="irregularNoteEmphasis">
+        欠油・未入庫・破損状況などを必ず入力
+      </div>
+      <textarea id="wizardIrregularNote" placeholder="QR破損・汚れ・管理番号が読めない・機械の特徴などを必ず入力"></textarea>
+      <div id="wizardIrregularQuantityBox" hidden>
+        <label for="wizardIrregularQuantity">数量</label>
+        <input id="wizardIrregularQuantity" type="number" inputmode="numeric" min="1" step="1" placeholder="数量">
+        <div id="wizardIrregularQuantityUnit" class="wizardPostSummary"></div>
+      </div>
+      <div id="wizardIrregularCheckResult" class="wizardPostSummary"></div>
+      <button type="button" id="wizardConfirmIrregularButton">入力内容を確認して写真へ進む</button>
+      <button type="button" id="wizardCancelIrregularButton" class="secondaryButton">イレギュラー受付を取消</button>
+    </div>
+
+    <div id="wizardRecMemoArea" class="wizardPostCard" hidden>
+      <h3>REC追記</h3>
+      <div id="wizardRecMemoTarget" class="wizardPostSummary"></div>
+      <textarea id="wizardRecMemoText" placeholder="発送日・発送先・証明書待ち等"></textarea>
+      <button type="button" id="wizardSaveRecMemoButton">追記を保存</button>
+      <button type="button" id="wizardSkipRecMemoButton" class="secondaryButton">追記なしで完了</button>
+    </div>
+
+    <div id="wizardPhotoArea" class="wizardPostCard" hidden>
+      <h3 id="wizardPhotoHeading">写真の添付</h3>
+      <p>1枚目は伝票写真を選択してください。顧客名・現場名の自動取得に使用します。</p>
+      <div id="wizardPhotoSummary" class="wizardPostSummary"></div>
+      <input id="wizardPhotoCameraInput" type="file" accept="image/*" capture="environment" hidden>
+      <input id="wizardPhotoLibraryInput" type="file" accept="image/*" multiple hidden>
+      <button type="button" id="wizardPhotoCameraButton">カメラで撮影</button>
+      <button type="button" id="wizardPhotoLibraryButton">ライブラリから選ぶ</button>
+      <button type="button" id="wizardClearPhotosButton" class="secondaryButton">選択写真をクリア</button>
+      <div id="wizardPhotoPreview" class="wizardPostSummary">写真はまだ選択されていません。</div>
+      <button type="button" id="wizardSavePhotosButton" hidden>写真を保存</button>
+      <button type="button" id="wizardSkipPhotosButton" class="secondaryButton">写真なしで完了</button>
+    </div>
+
+    <div id="wizardPhotoTitleArea" class="wizardPostCard" hidden>
+      <h3>保存タイトルを確認してください</h3>
+      <div id="wizardPhotoTitleCandidate" class="wizardTitleCandidate">タイトル未取得</div>
+      <label for="wizardPhotoCustomerName">顧客名</label>
+      <input id="wizardPhotoCustomerName" type="text" autocomplete="off" placeholder="顧客名">
+      <label for="wizardPhotoSiteName">現場名</label>
+      <input id="wizardPhotoSiteName" type="text" autocomplete="off" placeholder="現場名">
+      <button type="button" id="wizardConfirmPhotoTitleButton">このタイトルで保存</button>
+      <button type="button" id="wizardBackToPhotosButton" class="secondaryButton">写真選択画面へ戻る</button>
+    </div>
+
+    <button
+      id="wizardPostSendCancelButton"
+      class="wizardCancelSendButton"
+      type="button"
+    >
+      直前送信を取消（残り約5分）
+    </button>
+
+  </section>
+
   </main>
 
   <div id="legacySelectionBridge" hidden>
     <select id="mode" aria-hidden="true"></select>
-    <select id="location" aria-hidden="true"><option value="本社">本社</option><option value="三郷">三郷</option><option value="MF">MF</option></select>
-    <select id="user" aria-hidden="true"><option value="奥">奥</option><option value="滝島">滝島</option><option value="上野">上野</option><option value="見﨑">見﨑</option><option value="田之岡">田之岡</option><option value="篠塚">篠塚</option><option value="その他">その他</option></select>
-    <select id="recTarget" aria-hidden="true"><option value="騒音計">騒音計</option><option value="振動計">振動計</option><option value="内部USB">内部USB</option></select>
+
+    <select id="location" aria-hidden="true">
+      <option value="本社">本社</option>
+      <option value="三郷">三郷</option>
+      <option value="MF">MF</option>
+    </select>
+
+    <select id="user" aria-hidden="true">
+      <option value="奥">奥</option>
+      <option value="滝島">滝島</option>
+      <option value="上野">上野</option>
+      <option value="見﨑">見﨑</option>
+      <option value="田之岡">田之岡</option>
+      <option value="篠塚">篠塚</option>
+      <option value="その他">その他</option>
+    </select>
+
+    <select id="recTarget" aria-hidden="true">
+      <option value="騒音計">騒音計</option>
+      <option value="振動計">振動計</option>
+      <option value="内部USB">内部USB</option>
+    </select>
+
     <input id="recDate" type="date" aria-hidden="true">
   </div>
 
   <div id="inventoryRuntime" hidden></div>
   <script src="./scanner-try-harder-dev.js?v=49"></script>
-  <script src="./network-control.js?v=4"></script>
-  <script src="./app.js?v=67"></script>
-  <script src="./sales-stockin.js?v=98"></script>
+  <script src="./app.js?v=66"></script>
+  <script src="./sales-stockin.js?v=96"></script>
 </body>
 </html>
