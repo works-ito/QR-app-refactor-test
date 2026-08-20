@@ -2,7 +2,7 @@
 (function() {
   "use strict";
 
-  const REFACTOR_BUILD = "B10";
+  const REFACTOR_BUILD = "B11";
 
   const title = document.querySelector(".brandTitle");
   if (title) {
@@ -10,7 +10,7 @@
   }
 
   const script = document.createElement("script");
-  script.src = "./app-bootstrap.js?v=10";
+  script.src = "./app-bootstrap.js?v=11";
   script.onerror = function() {
     console.error("リファクタ版 app-bootstrap.js の読み込みに失敗しました");
   };
