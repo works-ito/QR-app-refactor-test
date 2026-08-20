@@ -1,4 +1,4 @@
-/* QR在庫管理 Refactor integration bootstrap v5 */
+/* QR在庫管理 Refactor integration bootstrap v6 */
 (function() {
   "use strict";
 
@@ -6,7 +6,9 @@
     return new Promise(function(resolve, reject) {
       const script = document.createElement("script");
       script.src = src;
-      script.onload = resolve;
+      script.onload = function() {
+        resolve(src);
+      };
       script.onerror = function() {
         reject(new Error("読み込み失敗：" + src));
       };
@@ -14,7 +16,32 @@
     });
   }
 
-  const modules = [
+  const failures = [];
+  window.refactorBootstrapFailures = failures;
+
+  function loadOne(src) {
+    return loadScript(src).catch(function(error) {
+      failures.push({
+        src:src,
+        message:error && error.message
+          ? error.message
+          : String(error)
+      });
+      console.error("リファクタ版モジュール読込失敗", src, error);
+      return null;
+    });
+  }
+
+  /*
+   * 共通ランタイムは最優先で読み込む。
+   * 後続の機能モジュールが1本失敗しても、
+   * 手動更新・受付終了・在庫更新制御は利用できる状態を保つ。
+   */
+  const foundationModules = [
+    "./runtime-control.js?v=2"
+  ];
+
+  const featureModules = [
     "https://cdn.jsdelivr.net/npm/zxing-wasm@3.1.3/dist/iife/reader/index.js",
     "./scanner-zxing-wasm-dev.js?v=50",
 
@@ -36,15 +63,29 @@
     "./gemini-timing-dev.js?v=77",
     "./gemini-whole-image-dev.js?v=80",
 
-    "./mode-description-hint-dev.js?v=37",
-    "./runtime-control.js?v=1"
+    "./mode-description-hint-dev.js?v=37"
   ];
 
-  modules.reduce(function(chain, src) {
-    return chain.then(function() {
-      return loadScript(src);
+  function loadSequentially(modules) {
+    return modules.reduce(function(chain, src) {
+      return chain.then(function() {
+        return loadOne(src);
+      });
+    }, Promise.resolve());
+  }
+
+  loadSequentially(foundationModules)
+    .then(function() {
+      return loadSequentially(featureModules);
+    })
+    .then(function() {
+      if (failures.length) {
+        console.warn(
+          "リファクタ版は一部モジュールの読込に失敗しました",
+          failures
+        );
+      } else {
+        console.info("refactor: bootstrap 読込完了");
+      }
     });
-  }, Promise.resolve()).catch(function(error) {
-    console.error("リファクタ版の初期化に失敗しました", error);
-  });
 })();
