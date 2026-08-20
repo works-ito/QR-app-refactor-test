@@ -1,7 +1,7 @@
-/* 販売品入庫受付 v101 bootstrap - development baseline */
+/* 販売品入庫受付 v102 bootstrap - refactor sales module */
 (function() {
   const title = document.querySelector(".brandTitle");
-  if (title) title.textContent = "QR在庫管理 B17";
+  if (title) title.textContent = "QR在庫管理 B18";
 
   function loadScript(src) {
     return new Promise(function(resolve, reject) {
@@ -17,9 +17,7 @@
 
   loadScript("https://cdn.jsdelivr.net/npm/zxing-wasm@3.1.3/dist/iife/reader/index.js")
     .then(function() { return loadScript("./scanner-zxing-wasm-dev.js?v=50"); })
-    .then(function() { return loadScript("./sales-stockin-core.js?v=33"); })
-    .then(function() { return loadScript("./sales-stockin-scan-enhancements.js?v=33"); })
-    .then(function() { return loadScript("./sales-stockin-guards.js?v=33"); })
+    .then(function() { return loadScript("./sales-stockin-module.js?v=3"); })
     .then(function() { return loadScript("./compact-scanner-dev.js?v=53"); })
     .then(function() { return loadScript("./irregular-master-picker-dev.js?v=64"); })
     .then(function() { return loadScript("./irregular-entry-simplify-dev.js?v=72"); })
@@ -38,6 +36,6 @@
     .then(function() { return loadScript("./inventory-refresh-control-dev.js?v=93"); })
     .then(function() { return loadScript("./manual-refresh-ui-dev.js?v=95"); })
     .catch(function(error) {
-      console.error("開発版追加処理の初期化に失敗しました", error);
+      console.error("リファクタ版追加処理の初期化に失敗しました", error);
     });
 })();
