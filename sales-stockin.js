@@ -1,5 +1,8 @@
-/* 販売品入庫受付 v100 bootstrap - development baseline */
+/* 販売品入庫受付 v101 bootstrap - development baseline */
 (function() {
+  const title = document.querySelector(".brandTitle");
+  if (title) title.textContent = "QR在庫管理 B17";
+
   function loadScript(src) {
     return new Promise(function(resolve, reject) {
       const script = document.createElement("script");
