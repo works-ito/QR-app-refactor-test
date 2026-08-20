@@ -1,5 +1,5 @@
 /*
- * Runtime control - refactor integration test
+ * Runtime control - refactor integration test v2
  *
  * Consolidates:
  * - wizard-session-finish-dev.js
@@ -19,13 +19,16 @@
   const RESUME_REFRESH_MS = 5 * 60 * 1000;
   const RECENT_REFRESH_SUPPRESS_MS = 2 * 60 * 1000;
   const PENDING_CHECK_MS = 2000;
+  const INITIAL_STATUS_CHECK_MS = 500;
+  const INITIAL_STATUS_CHECK_LIMIT = 60;
 
   let entranceCancelTimer = null;
   let refreshHiddenAt = null;
   let pendingInventoryRefresh = false;
   let lastInventoryRefreshAt = 0;
   let pendingCheckTimer = null;
-  let renderingFromCache = false;
+  let initialStatusCheckTimer = null;
+  let initialStatusCheckCount = 0;
 
   function readLastSend() {
     try {
@@ -224,6 +227,34 @@
     return false;
   }
 
+  function pad2(value) {
+    return String(value).padStart(2, "0");
+  }
+
+  function formatAbsoluteMinute(value) {
+    const date = new Date(value);
+    if (!Number.isFinite(date.getTime())) return "";
+
+    return (
+      date.getFullYear() + "/" +
+      pad2(date.getMonth() + 1) + "/" +
+      pad2(date.getDate()) + " " +
+      pad2(date.getHours()) + ":" +
+      pad2(date.getMinutes())
+    );
+  }
+
+  function renderRefreshTimestamp(value) {
+    const status = document.getElementById(STATUS_ID);
+    if (!status) return;
+
+    const formatted = formatAbsoluteMinute(value || Date.now());
+    if (!formatted) return;
+
+    status.textContent = "在庫データ：" + formatted;
+    status.className = "inventoryDataStatus isReady";
+  }
+
   function wasRecentlyRefreshed() {
     return (
       lastInventoryRefreshAt > 0 &&
@@ -234,6 +265,7 @@
   function markRefreshSuccess() {
     lastInventoryRefreshAt = Date.now();
     pendingInventoryRefresh = false;
+    renderRefreshTimestamp(lastInventoryRefreshAt);
   }
 
   function installLoadAppInitialDataTracking() {
@@ -369,54 +401,6 @@
     }, PENDING_CHECK_MS);
   }
 
-  function pad2(value) {
-    return String(value).padStart(2, "0");
-  }
-
-  function formatAbsoluteMinute(value) {
-    const date = new Date(value);
-    if (!Number.isFinite(date.getTime())) return "";
-
-    return (
-      date.getFullYear() + "/" +
-      pad2(date.getMonth() + 1) + "/" +
-      pad2(date.getDate()) + " " +
-      pad2(date.getHours()) + ":" +
-      pad2(date.getMinutes())
-    );
-  }
-
-  async function renderLatestCacheTimestamp(status) {
-    if (!status || renderingFromCache) return;
-    if (typeof restoreInventoryCache !== "function") return;
-
-    const text = String(status.textContent || "").trim();
-    if (
-      text.indexOf("確認中") >= 0 ||
-      text.indexOf("更新中") >= 0 ||
-      text.indexOf("更新失敗") >= 0
-    ) {
-      return;
-    }
-
-    renderingFromCache = true;
-    try {
-      const cache = await restoreInventoryCache();
-      const updatedAt = cache && cache.updatedAt
-        ? formatAbsoluteMinute(cache.updatedAt)
-        : "";
-
-      if (updatedAt) {
-        const nextText = "在庫データ：" + updatedAt;
-        if (status.textContent !== nextText) status.textContent = nextText;
-      }
-    } catch (error) {
-      console.warn("在庫データ更新時刻の表示に失敗しました", error);
-    } finally {
-      renderingFromCache = false;
-    }
-  }
-
   function runFullRefresh(button, status) {
     if (button.disabled) return;
 
@@ -463,17 +447,34 @@
       ".manualAppRefreshButtonDev:active{transform:translateY(1px);background:#f4f6f8;}" +
       ".manualAppRefreshButtonDev:disabled{opacity:.65;}";
     document.head.appendChild(style);
+  }
 
-    void renderLatestCacheTimestamp(status);
+  function startInitialStatusCheck() {
+    if (initialStatusCheckTimer) clearInterval(initialStatusCheckTimer);
+    initialStatusCheckCount = 0;
 
-    const observer = new MutationObserver(function() {
-      void renderLatestCacheTimestamp(status);
-    });
-    observer.observe(status, {
-      childList:true,
-      characterData:true,
-      subtree:true
-    });
+    initialStatusCheckTimer = setInterval(function() {
+      initialStatusCheckCount += 1;
+
+      if (
+        typeof appInitialDataLoaded !== "undefined" &&
+        appInitialDataLoaded === true &&
+        (
+          typeof appInitialDataLoading === "undefined" ||
+          appInitialDataLoading === false
+        )
+      ) {
+        markRefreshSuccess();
+        clearInterval(initialStatusCheckTimer);
+        initialStatusCheckTimer = null;
+        return;
+      }
+
+      if (initialStatusCheckCount >= INITIAL_STATUS_CHECK_LIMIT) {
+        clearInterval(initialStatusCheckTimer);
+        initialStatusCheckTimer = null;
+      }
+    }, INITIAL_STATUS_CHECK_MS);
   }
 
   function install() {
@@ -494,9 +495,15 @@
 
     if (
       typeof appInitialDataLoaded !== "undefined" &&
-      appInitialDataLoaded === true
+      appInitialDataLoaded === true &&
+      (
+        typeof appInitialDataLoading === "undefined" ||
+        appInitialDataLoading === false
+      )
     ) {
-      lastInventoryRefreshAt = Date.now();
+      markRefreshSuccess();
+    } else {
+      startInitialStatusCheck();
     }
 
     clearStaleWizardSendStatus();
@@ -512,7 +519,7 @@
     window.runPendingInventoryRefreshAfterSession = runPendingInventoryRefreshAfterSession;
     window.requestInventoryRefreshDev = requestInventoryRefresh;
 
-    console.info("refactor: runtime-control 読込完了");
+    console.info("refactor: runtime-control v2 読込完了");
   }
 
   if (document.readyState === "loading") {
