@@ -1,0 +1,44 @@
+name: Import refactor snapshot
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout destination
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Clone refactor source branch
+        run: |
+          git clone --depth 1 --branch refactor-integration-test \
+            https://github.com/works-ito/QR-app-development.git /tmp/refactor-source
+
+      - name: Copy snapshot
+        run: |
+          rsync -a --delete \
+            --exclude='.git/' \
+            --exclude='.github/workflows/import-refactor.yml' \
+            /tmp/refactor-source/ ./
+
+      - name: Commit imported snapshot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to import"
+            exit 0
+          fi
+          git commit -m "Import refactor-integration-test snapshot"
+          git push origin main
