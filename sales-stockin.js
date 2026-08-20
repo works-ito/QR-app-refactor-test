@@ -6,7 +6,7 @@
 
   const title = document.querySelector(".brandTitle");
   if (title) {
-    title.textContent = "QR在庫管理・リファクターテスト " + REFACTOR_BUILD;
+    title.textContent = "QR在庫管理 " + REFACTOR_BUILD;
   }
 
   const script = document.createElement("script");
