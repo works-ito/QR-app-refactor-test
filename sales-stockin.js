@@ -1,8 +1,5 @@
-/* B16 diagnostic baseline: development v96 bootstrap, unchanged load path */
+/* 販売品入庫受付 v100 bootstrap - development baseline */
 (function() {
-  const title = document.querySelector(".brandTitle");
-  if (title) title.textContent = "QR在庫管理 B16";
-
   function loadScript(src) {
     return new Promise(function(resolve, reject) {
       const script = document.createElement("script");
@@ -38,6 +35,6 @@
     .then(function() { return loadScript("./inventory-refresh-control-dev.js?v=93"); })
     .then(function() { return loadScript("./manual-refresh-ui-dev.js?v=95"); })
     .catch(function(error) {
-      console.error("B16 development baseline initialization failed", error);
+      console.error("開発版追加処理の初期化に失敗しました", error);
     });
 })();
