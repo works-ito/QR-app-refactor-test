@@ -1,4 +1,4 @@
-/* QR在庫管理 Refactor integration bootstrap v8 */
+/* QR在庫管理 Refactor integration bootstrap v9 */
 (function() {
   "use strict";
 
@@ -37,7 +37,7 @@
    * 機能モジュールが失敗しても、在庫更新と受付セッション制御は残す。
    */
   const foundationModules = [
-    "./inventory.js?v=2",
+    "./inventory.js?v=3",
     "./runtime-control.js?v=3"
   ];
 
@@ -85,7 +85,7 @@
           failures
         );
       } else {
-        console.info("refactor: bootstrap v8 読込完了");
+        console.info("refactor: bootstrap v9 読込完了");
       }
     });
 })();
