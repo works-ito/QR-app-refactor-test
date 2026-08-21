@@ -1,5 +1,5 @@
 /*
- * 受付セッション正常終了 v90
+ * 受付セッション正常終了 v91
  *
  * 目的：
  * - 1受付 = 1セッションとし、正常完了後にQRカメラへ自動復帰しない。
@@ -14,12 +14,14 @@
  * - 直前送信取消情報は app.js の lastSuccessfulSend を唯一の参照元にする。
  * - このモジュール独自の localStorage 読取とキー重複を廃止する。
  *
- * v90（P0原因切り分け）:
- * - 受付入口からの直前送信取消時だけ、app.js の取消成功直後に走る
+ * v91:
+ * - 受付入口からの直前送信取消では、snapshot復元直後の
  *   refreshInventoryInBackground() を1回抑止する。
- * - snapshotで復元した端末状態を、取消反映前のGAS応答で再び上書きする
- *   可能性があるか実機で確認するための診断修正。
- * - 原因確定後は app.js の取消経路へ恒久統合し、この診断処理は撤去する。
+ * - 実機確認で、取消直後に再取得すると取消反映前の「出庫中」が再流入し、
+ *   snapshotで戻した状態を上書きすることを確認したため。
+ * - 検品取消の再取得経路は変更しない。
+ * - 2026-08-21 実機確認: GET24-4003
+ *   出庫→送信→取消→通常受付→同一QR再出庫が正常。
  *
  * GASは変更しない。
  */
@@ -46,7 +48,7 @@
     return lastSuccessfulSend;
   }
 
-  async function cancelFromReceptionForDiagnosis() {
+  async function cancelFromReception() {
     if (typeof cancelLastSuccessfulSend !== "function") return;
 
     const canTemporarilySuppressRefresh =
@@ -59,7 +61,7 @@
     if (canTemporarilySuppressRefresh) {
       refreshInventoryInBackground = async function() {
         console.info(
-          "開発版：取消直後のバックグラウンド在庫再取得を診断用に抑止しました"
+          "受付入口取消：snapshot復元直後の在庫再取得を抑止しました"
         );
         return true;
       };
@@ -90,7 +92,7 @@
     button.style.marginTop = "14px";
 
     button.addEventListener("click", async function() {
-      await cancelFromReceptionForDiagnosis();
+      await cancelFromReception();
       renderEntranceCancelButton();
     });
 
@@ -259,7 +261,7 @@
       }
     });
 
-    console.info("開発版：1受付1セッション v90 読込完了");
+    console.info("開発版：1受付1セッション v91 読込完了");
   }
 
   if (document.readyState === "loading") {
