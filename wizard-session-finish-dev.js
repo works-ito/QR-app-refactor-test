@@ -1,5 +1,5 @@
 /*
- * 受付セッション正常終了 v95
+ * 受付セッション正常終了 v96
  *
  * 目的：
  * - 1受付 = 1セッションとし、正常完了後にQRカメラへ自動復帰しない。
@@ -42,6 +42,11 @@
  * - finishWizardSession() の送信結果クリア重複を撤去。
  * - resetWizard() 後の renderEntranceCancelButton() が受付入口で同じclearを行うため、
  *   明示 clearStaleWizardSendStatus() 呼出しを削除して1経路に統一。
+ *
+ * v96:
+ * - sales-stockin.js のロード順で app.js 読込完了後に本モジュールが1回だけ実行されるため、
+ *   resumeWizardContinuousScan wrapper の再インストール判定・500ms再試行を撤去。
+ * - __oneSessionPatched / __original の補助プロパティも撤去し、単一インストール経路へ整理。
  *
  * GASは変更しない。
  */
@@ -128,11 +133,6 @@
       typeof wizardState !== "undefined" &&
       wizardState.currentStep === "reception";
 
-    /*
-     * resetWizard() をwrapせず、受付入口へ戻った時点で
-     * 前回の送信結果表示を掃除する。
-     * wizardSendResultUnknown=true の場合は clear 側で保持される。
-     */
     if (onReception) {
       clearStaleWizardSendStatus();
     }
@@ -186,10 +186,6 @@
   }
 
   async function finishWizardSession() {
-    /*
-     * 正常終了時だけ使用する。
-     * lastSuccessfulSend / localStorage / 在庫キャッシュは触らない。
-     */
     if (typeof stopReadOnlyScanner === "function") {
       await stopReadOnlyScanner();
     }
@@ -207,25 +203,15 @@
   }
 
   function installContinuousScanPatch() {
-    if (typeof resumeWizardContinuousScan !== "function") return false;
-    if (resumeWizardContinuousScan.__oneSessionPatched) return true;
-
     const original = resumeWizardContinuousScan;
 
-    const patched = async function(message) {
+    resumeWizardContinuousScan = async function(message) {
       const text = String(message || "");
 
-      /*
-       * 直前送信取消後は従来どおり、その場で同じQRを再読取できるようにする。
-       */
       if (text.includes("取消完了")) {
         return await original.apply(this, arguments);
       }
 
-      /*
-       * 一部送信失敗時は失敗レコードが scannedEntries に残る。
-       * ここで入口へ戻すと失敗分を消してしまうため、従来の連続読取へ戻す。
-       */
       if (
         typeof scannedEntries !== "undefined" &&
         Array.isArray(scannedEntries) &&
@@ -236,21 +222,12 @@
 
       return await finishWizardSession();
     };
-
-    patched.__oneSessionPatched = true;
-    patched.__original = original;
-    resumeWizardContinuousScan = patched;
-    return true;
   }
 
   function install() {
     ensureEntranceCancelButton();
+    installContinuousScanPatch();
 
-    if (!installContinuousScanPatch()) {
-      setTimeout(installContinuousScanPatch, 500);
-    }
-
-    /* app.js の初期 resetWizard() はこのモジュール読込前に実行済みなので、初回だけ明示掃除 */
     clearStaleWizardSendStatus();
     renderEntranceCancelButton();
 
@@ -263,7 +240,7 @@
       }
     });
 
-    console.info("開発版：1受付1セッション v95 読込完了");
+    console.info("開発版：1受付1セッション v96 読込完了");
   }
 
   if (document.readyState === "loading") {
