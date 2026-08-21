@@ -1,5 +1,5 @@
 /*
- * 受付セッション正常終了 v88
+ * 受付セッション正常終了 v89
  *
  * 目的：
  * - 1受付 = 1セッションとし、正常完了後にQRカメラへ自動復帰しない。
@@ -10,24 +10,33 @@
  * - イレギュラーマスタ選択パネルが正常完了後に残らないよう明示的に閉じる。
  * - 新しい受付セッション開始時に、前回の送信結果表示だけが残らないようにする。
  *
+ * v89:
+ * - 直前送信取消情報は app.js の lastSuccessfulSend を唯一の参照元にする。
+ * - このモジュール独自の localStorage 読取とキー重複を廃止する。
+ *
  * GASは変更しない。
  */
 (function() {
   "use strict";
 
-  const LAST_SEND_KEY = "qrInventoryWizardLastSuccessfulSendV1";
   const ENTRANCE_CANCEL_ID = "receptionLastSendCancelButton";
   let entranceCancelTimer = null;
 
   function readLastSend() {
-    try {
-      const value = JSON.parse(localStorage.getItem(LAST_SEND_KEY) || "null");
-      if (!value) return null;
-      if (Number(value.expiresAt || 0) <= Date.now()) return null;
-      return value;
-    } catch (error) {
+    if (
+      typeof lastSuccessfulSend === "undefined" ||
+      !lastSuccessfulSend
+    ) {
       return null;
     }
+
+    if (
+      Number(lastSuccessfulSend.expiresAt || 0) <= Date.now()
+    ) {
+      return null;
+    }
+
+    return lastSuccessfulSend;
   }
 
   function ensureEntranceCancelButton() {
@@ -216,7 +225,7 @@
       }
     });
 
-    console.info("開発版：1受付1セッション v88 読込完了");
+    console.info("開発版：1受付1セッション v89 読込完了");
   }
 
   if (document.readyState === "loading") {
