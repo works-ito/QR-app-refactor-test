@@ -1,5 +1,5 @@
 /*
- * 受付セッション正常終了 v92
+ * 受付セッション正常終了 v93
  *
  * 目的：
  * - 1受付 = 1セッションとし、正常完了後にQRカメラへ自動復帰しない。
@@ -28,6 +28,10 @@
  * - 送信結果表示の掃除は、正常終了時の明示処理と受付入口描画時に集約。
  * - 「最初から」で受付入口へ戻った場合も、既存の入口描画タイマー内で掃除する。
  * - 新しいObserver・capture・補修ファイルは追加しない。
+ *
+ * v93:
+ * - finishWizardSession() 内で二重だった closeIrregularMasterPicker() を1回へ整理。
+ * - resetWizard() はピッカーDOMを再生成しないため、reset後の明示closeだけを残す。
  *
  * GASは変更しない。
  */
@@ -180,15 +184,11 @@
       await stopReadOnlyScanner();
     }
 
-    closeIrregularMasterPicker();
-
     if (typeof resetWizard === "function") {
       resetWizard();
     }
 
     clearStaleWizardSendStatus();
-
-    /* reset後に独立モジュール側が残るケースへも念押し */
     closeIrregularMasterPicker();
     renderEntranceCancelButton();
 
@@ -256,7 +256,7 @@
       }
     });
 
-    console.info("開発版：1受付1セッション v92 読込完了");
+    console.info("開発版：1受付1セッション v93 読込完了");
   }
 
   if (document.readyState === "loading") {
