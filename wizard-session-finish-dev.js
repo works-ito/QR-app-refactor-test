@@ -1,5 +1,5 @@
 /*
- * 受付セッション正常終了 v89
+ * 受付セッション正常終了 v90
  *
  * 目的：
  * - 1受付 = 1セッションとし、正常完了後にQRカメラへ自動復帰しない。
@@ -13,6 +13,13 @@
  * v89:
  * - 直前送信取消情報は app.js の lastSuccessfulSend を唯一の参照元にする。
  * - このモジュール独自の localStorage 読取とキー重複を廃止する。
+ *
+ * v90（P0原因切り分け）:
+ * - 受付入口からの直前送信取消時だけ、app.js の取消成功直後に走る
+ *   refreshInventoryInBackground() を1回抑止する。
+ * - snapshotで復元した端末状態を、取消反映前のGAS応答で再び上書きする
+ *   可能性があるか実機で確認するための診断修正。
+ * - 原因確定後は app.js の取消経路へ恒久統合し、この診断処理は撤去する。
  *
  * GASは変更しない。
  */
@@ -39,6 +46,34 @@
     return lastSuccessfulSend;
   }
 
+  async function cancelFromReceptionForDiagnosis() {
+    if (typeof cancelLastSuccessfulSend !== "function") return;
+
+    const canTemporarilySuppressRefresh =
+      typeof refreshInventoryInBackground === "function";
+
+    const originalRefresh = canTemporarilySuppressRefresh
+      ? refreshInventoryInBackground
+      : null;
+
+    if (canTemporarilySuppressRefresh) {
+      refreshInventoryInBackground = async function() {
+        console.info(
+          "開発版：取消直後のバックグラウンド在庫再取得を診断用に抑止しました"
+        );
+        return true;
+      };
+    }
+
+    try {
+      await cancelLastSuccessfulSend();
+    } finally {
+      if (originalRefresh) {
+        refreshInventoryInBackground = originalRefresh;
+      }
+    }
+  }
+
   function ensureEntranceCancelButton() {
     const reception = document.getElementById("receptionStep");
     if (!reception) return null;
@@ -55,8 +90,7 @@
     button.style.marginTop = "14px";
 
     button.addEventListener("click", async function() {
-      if (typeof cancelLastSuccessfulSend !== "function") return;
-      await cancelLastSuccessfulSend();
+      await cancelFromReceptionForDiagnosis();
       renderEntranceCancelButton();
     });
 
@@ -225,7 +259,7 @@
       }
     });
 
-    console.info("開発版：1受付1セッション v89 読込完了");
+    console.info("開発版：1受付1セッション v90 読込完了");
   }
 
   if (document.readyState === "loading") {
