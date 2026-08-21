@@ -1,5 +1,5 @@
 /*
- * 受付セッション正常終了 v97
+ * 受付セッション正常終了 v98
  *
  * 目的：
  * - 1受付 = 1セッションとし、正常完了後にQRカメラへ自動復帰しない。
@@ -52,6 +52,11 @@
  * - install() 初期化時の clearStaleWizardSendStatus() 直接呼出しを撤去。
  * - 直後の renderEntranceCancelButton() が受付入口で同じclearを実行するため、
  *   初期送信結果クリアも入口描画の1経路へ統一。
+ *
+ * v98:
+ * - 正常終了専用 finishWizardSession() を撤去。
+ * - resumeWizardContinuousScan wrapper の正常終了分岐から stop→reset→入口描画まで直接実行し、
+ *   wrapper→finish関数→reset の中継1段を削除。
  *
  * GASは変更しない。
  */
@@ -190,23 +195,6 @@
     status.className = "wizardSendStatus";
   }
 
-  async function finishWizardSession() {
-    if (typeof stopReadOnlyScanner === "function") {
-      await stopReadOnlyScanner();
-    }
-
-    if (typeof resetWizard === "function") {
-      resetWizard();
-    }
-
-    closeIrregularMasterPicker();
-    renderEntranceCancelButton();
-
-    try {
-      window.scrollTo({top:0, behavior:"smooth"});
-    } catch (error) {}
-  }
-
   function installContinuousScanPatch() {
     const original = resumeWizardContinuousScan;
 
@@ -225,7 +213,20 @@
         return await original.apply(this, arguments);
       }
 
-      return await finishWizardSession();
+      if (typeof stopReadOnlyScanner === "function") {
+        await stopReadOnlyScanner();
+      }
+
+      if (typeof resetWizard === "function") {
+        resetWizard();
+      }
+
+      closeIrregularMasterPicker();
+      renderEntranceCancelButton();
+
+      try {
+        window.scrollTo({top:0, behavior:"smooth"});
+      } catch (error) {}
     };
   }
 
@@ -244,7 +245,7 @@
       }
     });
 
-    console.info("開発版：1受付1セッション v97 読込完了");
+    console.info("開発版：1受付1セッション v98 読込完了");
   }
 
   if (document.readyState === "loading") {
