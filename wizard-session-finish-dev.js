@@ -1,5 +1,5 @@
 /*
- * 受付セッション正常終了 v93
+ * 受付セッション正常終了 v94
  *
  * 目的：
  * - 1受付 = 1セッションとし、正常完了後にQRカメラへ自動復帰しない。
@@ -32,6 +32,11 @@
  * v93:
  * - finishWizardSession() 内で二重だった closeIrregularMasterPicker() を1回へ整理。
  * - resetWizard() はピッカーDOMを再生成しないため、reset後の明示closeだけを残す。
+ *
+ * v94:
+ * - finishWizardSession の不要な window 公開を撤去。
+ * - resumeWizardContinuousScan は既存グローバルbindingへの代入だけに統一し、
+ *   同じ関数を window へ二重代入する経路を撤去。
  *
  * GASは変更しない。
  */
@@ -231,8 +236,6 @@
     patched.__oneSessionPatched = true;
     patched.__original = original;
     resumeWizardContinuousScan = patched;
-    window.resumeWizardContinuousScan = patched;
-    window.finishWizardSession = finishWizardSession;
     return true;
   }
 
@@ -256,7 +259,7 @@
       }
     });
 
-    console.info("開発版：1受付1セッション v93 読込完了");
+    console.info("開発版：1受付1セッション v94 読込完了");
   }
 
   if (document.readyState === "loading") {
