@@ -1,5 +1,5 @@
 /*
- * 受付セッション正常終了 v96
+ * 受付セッション正常終了 v97
  *
  * 目的：
  * - 1受付 = 1セッションとし、正常完了後にQRカメラへ自動復帰しない。
@@ -47,6 +47,11 @@
  * - sales-stockin.js のロード順で app.js 読込完了後に本モジュールが1回だけ実行されるため、
  *   resumeWizardContinuousScan wrapper の再インストール判定・500ms再試行を撤去。
  * - __oneSessionPatched / __original の補助プロパティも撤去し、単一インストール経路へ整理。
+ *
+ * v97:
+ * - install() 初期化時の clearStaleWizardSendStatus() 直接呼出しを撤去。
+ * - 直後の renderEntranceCancelButton() が受付入口で同じclearを実行するため、
+ *   初期送信結果クリアも入口描画の1経路へ統一。
  *
  * GASは変更しない。
  */
@@ -228,7 +233,6 @@
     ensureEntranceCancelButton();
     installContinuousScanPatch();
 
-    clearStaleWizardSendStatus();
     renderEntranceCancelButton();
 
     if (entranceCancelTimer) clearInterval(entranceCancelTimer);
@@ -240,7 +244,7 @@
       }
     });
 
-    console.info("開発版：1受付1セッション v96 読込完了");
+    console.info("開発版：1受付1セッション v97 読込完了");
   }
 
   if (document.readyState === "loading") {
