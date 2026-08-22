@@ -3012,7 +3012,6 @@ function changePreviousSettings() {
 
     function renderCancelSendButton() {
       const buttons = [
-        document.getElementById("wizardCancelSendButton"),
         document.getElementById("wizardPostSendCancelButton"),
         document.getElementById("quantityInspectionCancelSendButton")
       ].filter(Boolean);
@@ -6234,10 +6233,6 @@ document
     "click",
     sendWizardBatch
   );
-
-document
-  .getElementById("wizardCancelSendButton")
-  .addEventListener("click", cancelLastSuccessfulSend);
 
 document
   .getElementById("wizardPostSendCancelButton")
