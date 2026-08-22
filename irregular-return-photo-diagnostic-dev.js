@@ -1,4 +1,4 @@
-/* イレギュラー返却：写真遷移診断 v1 */
+/* イレギュラー返却：写真遷移診断 v2 */
 (function() {
   "use strict";
 
@@ -30,6 +30,57 @@
     return wizardState &&
       wizardState.receptionType === "irregular" &&
       wizardState.mode === "返却";
+  }
+
+  function buildDiagnosticText() {
+    return log.length
+      ? log.map(function(row) {
+          return row.t + "  " + row.stage +
+            " | mode=" + row.mode +
+            " | scanned=" + row.scannedCount +
+            " | photoHidden=" + row.photoHidden +
+            " | sendId=" + (row.sendId || "-") +
+            (row.extra ? " | " + JSON.stringify(row.extra) : "");
+        }).join("\n")
+      : "診断ログはまだありません";
+  }
+
+  window.showIrregularReturnPhotoDiagnostic = function() {
+    const text = buildDiagnosticText();
+    alert(text);
+    return text;
+  };
+
+  function installDiagnosticButton() {
+    if (document.getElementById("irregularReturnDiagnosticButton")) return;
+
+    const button = document.createElement("button");
+    button.id = "irregularReturnDiagnosticButton";
+    button.type = "button";
+    button.textContent = "診断ログ表示";
+    button.setAttribute("aria-label", "イレギュラー返却の診断ログを表示");
+
+    Object.assign(button.style, {
+      position:"fixed",
+      right:"14px",
+      bottom:"calc(14px + env(safe-area-inset-bottom))",
+      zIndex:"9999",
+      minHeight:"46px",
+      padding:"10px 14px",
+      border:"2px solid #5b6472",
+      borderRadius:"12px",
+      background:"#ffffff",
+      color:"#172033",
+      fontSize:"15px",
+      fontWeight:"800",
+      boxShadow:"0 4px 14px rgba(0,0,0,0.18)"
+    });
+
+    button.addEventListener("click", function() {
+      window.showIrregularReturnPhotoDiagnostic();
+    });
+
+    document.body.appendChild(button);
   }
 
   const originalSend = window.sendWizardBatch;
@@ -87,20 +138,6 @@
     };
   }
 
-  window.showIrregularReturnPhotoDiagnostic = function() {
-    const text = log.length
-      ? log.map(function(row) {
-          return row.t + "  " + row.stage +
-            " | mode=" + row.mode +
-            " | scanned=" + row.scannedCount +
-            " | photoHidden=" + row.photoHidden +
-            " | sendId=" + (row.sendId || "-") +
-            (row.extra ? " | " + JSON.stringify(row.extra) : "");
-        }).join("\n")
-      : "診断ログはまだありません";
-    alert(text);
-    return text;
-  };
-
-  console.info("開発版：イレギュラー返却 写真遷移診断 v1 読込完了");
+  installDiagnosticButton();
+  console.info("開発版：イレギュラー返却 写真遷移診断 v2 読込完了");
 })();
