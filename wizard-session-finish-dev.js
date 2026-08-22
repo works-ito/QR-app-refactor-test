@@ -1,5 +1,5 @@
 /*
- * 受付セッション正常終了 v99
+ * 受付セッション正常終了 v100
  *
  * 目的：
  * - 1受付 = 1セッションとし、正常完了後にQRカメラへ自動復帰しない。
@@ -62,13 +62,17 @@
  * - 正常終了時だけ使われていた closeIrregularMasterPicker() 専用関数を撤去。
  * - ピッカー終了処理を正常終了分岐へ直接配置し、中継関数を1段削除。
  *
+ * v100:
+ * - install() はロード順上1回だけ実行されるため entranceCancelTimer の保持・再clearを撤去。
+ * - 入口取消ボタンは1秒setIntervalで常時更新されるため、visibilitychange の二重再描画を撤去。
+ * - 入口取消表示の更新経路を1秒タイマーへ一本化。
+ *
  * GASは変更しない。
  */
 (function() {
   "use strict";
 
   const ENTRANCE_CANCEL_ID = "receptionLastSendCancelButton";
-  let entranceCancelTimer = null;
 
   function readLastSend() {
     if (
@@ -236,17 +240,9 @@
     installContinuousScanPatch();
 
     renderEntranceCancelButton();
+    setInterval(renderEntranceCancelButton, 1000);
 
-    if (entranceCancelTimer) clearInterval(entranceCancelTimer);
-    entranceCancelTimer = setInterval(renderEntranceCancelButton, 1000);
-
-    document.addEventListener("visibilitychange", function() {
-      if (document.visibilityState === "visible") {
-        renderEntranceCancelButton();
-      }
-    });
-
-    console.info("開発版：1受付1セッション v99 読込完了");
+    console.info("開発版：1受付1セッション v100 読込完了");
   }
 
   if (document.readyState === "loading") {
