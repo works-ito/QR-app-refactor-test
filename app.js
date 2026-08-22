@@ -6021,7 +6021,7 @@ function changePreviousSettings() {
   wizardSelectedPhotos = [];
   wizardCurrentSlipInfo = null;
   wizardPendingPhotoSave = null;
-  document.getElementById("wizardPostSendArea").hidden = true;
+  
   document.getElementById("wizardIrregularArea").hidden = true;
   document.getElementById("wizardRecMemoArea").hidden = true;
   document.getElementById("wizardPhotoArea").hidden = true;
