@@ -1,5 +1,5 @@
 /*
- * 受付セッション正常終了 v102
+ * 受付セッション正常終了 v103
  *
  * 目的：
  * - 1受付 = 1セッションとし、正常完了後にQRカメラへ自動復帰しない。
@@ -18,10 +18,14 @@
  * - 取消表示は利用者を焦らせない分単位表示、1分間隔更新。
  *
  * v102:
- * - 正常終了時、resetWizard() 直後は wizardState.currentStep の反映タイミングにより
- *   入口取消ボタンがまだ非表示になる場合があるため、入口描画を次イベントループでもう1回実行。
- * - 1分タイマーを待たず、初期画面へ戻った直後から直前送信取消を表示する。
- * - 分単位表示・1分間隔更新・取消期限の内部精度は変更しない。
+ * - 初期画面復帰直後の入口取消表示遅延に対し、setTimeout再描画を暫定追加。
+ *
+ * v103:
+ * - receptionLastSendCancelButton を index.html の正式DOMへ移動。
+ * - document.createElement / appendChild / JS内style指定を撤去。
+ * - 入口取消ボタンの表示制御を、既存取消ボタンと同じ isVisible class に統一。
+ * - v102の setTimeout再描画を撤去。正常終了時の1回描画だけに戻す。
+ * - 独自1分更新は現時点では維持し、本体 renderCancelSendButton 統合後に撤去する。
  *
  * GASは変更しない。
  */
@@ -68,32 +72,12 @@
     }
   }
 
-  function ensureEntranceCancelButton() {
-    const reception = document.getElementById("receptionStep");
-    if (!reception) return null;
-
-    let button = document.getElementById(ENTRANCE_CANCEL_ID);
-    if (button) return button;
-
-    button = document.createElement("button");
-    button.id = ENTRANCE_CANCEL_ID;
-    button.type = "button";
-    button.className = "wizardCancelSendButton";
-    button.hidden = true;
-    button.style.width = "100%";
-    button.style.marginTop = "14px";
-
-    button.addEventListener("click", async function() {
-      await cancelFromReception();
-      renderEntranceCancelButton();
-    });
-
-    reception.appendChild(button);
-    return button;
+  function getEntranceCancelButton() {
+    return document.getElementById(ENTRANCE_CANCEL_ID);
   }
 
   function renderEntranceCancelButton() {
-    const button = ensureEntranceCancelButton();
+    const button = getEntranceCancelButton();
     if (!button) return;
 
     const onReception =
@@ -103,10 +87,13 @@
     if (onReception) clearStaleWizardSendStatus();
 
     const transaction = readLastSend();
-    if (!transaction || !onReception) {
-      button.hidden = true;
-      return;
-    }
+    const isVisible = Boolean(transaction && onReception);
+
+    button.classList.toggle("isVisible", isVisible);
+    button.disabled =
+      typeof wizardSendBusy !== "undefined" && wizardSendBusy === true;
+
+    if (!isVisible) return;
 
     const remainingMs = Math.max(
       0,
@@ -118,7 +105,6 @@
       remainingMs < 60000
         ? "直前送信を取消（有効時間：1分未満）"
         : "直前送信を取消（残り約" + remainingMinutes + "分）";
-    button.hidden = false;
   }
 
   function clearStaleWizardSendStatus() {
@@ -175,7 +161,6 @@
       }
 
       renderEntranceCancelButton();
-      setTimeout(renderEntranceCancelButton, 0);
 
       try {
         window.scrollTo({top:0, behavior:"smooth"});
@@ -184,13 +169,19 @@
   }
 
   function install() {
-    ensureEntranceCancelButton();
-    installContinuousScanPatch();
+    const button = getEntranceCancelButton();
+    if (button) {
+      button.addEventListener("click", async function() {
+        await cancelFromReception();
+        renderEntranceCancelButton();
+      });
+    }
 
+    installContinuousScanPatch();
     renderEntranceCancelButton();
     setInterval(renderEntranceCancelButton, 60000);
 
-    console.info("開発版：1受付1セッション v102 読込完了");
+    console.info("開発版：1受付1セッション v103 読込完了");
   }
 
   if (document.readyState === "loading") {
