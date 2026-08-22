@@ -25,7 +25,7 @@
     .then(function() { return loadScript("./irregular-master-layout-dev.js?v=40"); })
     .then(function() { return loadScript("./irregular-registration-guard-dev.js?v=43"); })
     .then(function() { return loadScript("./irregular-quantity-flow-dev.js?v=55"); })
-    .then(function() { return loadScript("./irregular-master-send-bridge-dev.js?v=85"); })
+    .then(function() { return loadScript("./irregular-master-send-bridge-dev.js?v=86"); })
     .then(function() { return loadScript("./irregular-master-shipment-photo-dev.js?v=82"); })
     .then(function() { return loadScript("./quantity-transfer-dev.js?v=96"); })
     .then(function() { return loadScript("./gemini-timing-dev.js?v=77"); })
