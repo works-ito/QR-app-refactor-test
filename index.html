@@ -257,7 +257,6 @@
       <p class="questionHint">
         作業を実施している拠点を選択します
       </p>
-
       <div
         id="locationButtons"
         class="buttonGrid singleColumn"
@@ -525,6 +524,7 @@
           <button
             id="wizardConfirmReturnMemoButton"
             type="button"
+            hidden
           >
             この内容で返却を送信
           </button>
@@ -533,6 +533,7 @@
             id="wizardCancelReturnMemoButton"
             class="secondaryButton"
             type="button"
+            hidden
           >
             戻る
           </button>
@@ -542,6 +543,19 @@
           id="wizardSendBatchButton"
           class="wizardSendButton"
           type="button"
+          onclick="
+            var returnMemoArea = document.getElementById('wizardReturnMemoArea');
+            if (returnMemoArea && !returnMemoArea.hidden) {
+              document.getElementById('wizardConfirmReturnMemoButton').click();
+              event.stopImmediatePropagation();
+              return false;
+            }
+            setTimeout(function() {
+              if (returnMemoArea && !returnMemoArea.hidden) {
+                document.getElementById('wizardSendBatchButton').innerText = 'この内容で返却を送信';
+              }
+            }, 0);
+          "
         >
           読取分をまとめて送信
         </button>
