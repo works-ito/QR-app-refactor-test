@@ -4458,21 +4458,26 @@ function changePreviousSettings() {
         });
 
         if (successfulIndexes.length > 0) {
-          await saveInventoryCache();
-          saveLastSuccessfulSend({
-            sendId:result.sendId || lastPendingSendId,
-            sentAt:sentAt,
-            expiresAt:Date.now() + CANCEL_SEND_VALID_MS,
-            successCount:successfulIndexes.length,
-            logIds:resultItems
-              .filter(function(item) { return item.ok && item.logId; })
-              .map(function(item) { return item.logId; }),
-            snapshots:successfulIndexes
-              .map(function(index) { return snapshots[index]; })
-              .filter(Boolean),
-            recentWorkKeys:recentWorkKeys
-          });
-        }
+  await saveInventoryCache();
+
+  if (wizardState.mode === "出庫取消") {
+    clearLastSuccessfulSend();
+  } else {
+    saveLastSuccessfulSend({
+      sendId:result.sendId || lastPendingSendId,
+      sentAt:sentAt,
+      expiresAt:Date.now() + CANCEL_SEND_VALID_MS,
+      successCount:successfulIndexes.length,
+      logIds:resultItems
+        .filter(function(item) { return item.ok && item.logId; })
+        .map(function(item) { return item.logId; }),
+      snapshots:successfulIndexes
+        .map(function(index) { return snapshots[index]; })
+        .filter(Boolean),
+      recentWorkKeys:recentWorkKeys
+    });
+  }
+}
 
         scannedEntries = sourceEntries.filter(function(entry, index) {
           return !successfulSet.has(index);
