@@ -1,5 +1,5 @@
 /*
- * イレギュラー受付：マスタ選択 → 共通送信ブリッジ補強 v87
+ * イレギュラー受付：マスタ選択 → 共通送信ブリッジ補強 v88
  *
  * 目的：
  * - マスタ選択キューを通常QRと同じ scannedEntries / sendWizardBatch() へ渡す。
@@ -9,6 +9,9 @@
  *   共通の beginWizardPostSendFlow() が次画面を開く直前に既存処理で閉じる。
  * - イレギュラー返却では、返却追記・共通送信ボタン・送信状態を1セットで
  *   post-send 領域へ一時移動し、通常返却と同じ正規送信経路を使う。
+ * - イレギュラー返却の実送信成功後、既存フローで写真画面が開かなかった場合だけ、
+ *   同じ送信内容から post-send context を再構築して beginWizardPostSendFlow() を実行する。
+ *   GASへの再送信は行わない。
  * - 同一レコードが既に staged 済みなら、同内容に限って再利用する。
  * - 数量・出庫取消は sourceQuantityLogId まで含めて同一性を判定する。
  * - 数量管理品の拠点移動は sourceLocation を共通送信レコードへ保持する。
@@ -17,6 +20,9 @@
  */
 (function() {
   "use strict";
+
+  let pendingIrregularReturnEntries = null;
+  const originalSendWizardBatch = window.sendWizardBatch;
 
   function normalize(value) {
     return String(value == null ? "" : value).trim();
@@ -134,6 +140,113 @@
       attributes:true,
       attributeFilter:["hidden"]
     });
+  }
+
+  async function ensureIrregularReturnPhotoFlow(
+    sourceEntries,
+    previousSendId,
+    returnMemo,
+    returnCaseId
+  ) {
+    if (
+      wizardState.receptionType !== "irregular" ||
+      wizardState.mode !== "返却"
+    ) {
+      return;
+    }
+
+    const photoArea = document.getElementById("wizardPhotoArea");
+
+    /* 既存フローが正常に写真画面を開いていれば何もしない。 */
+    if (photoArea && photoArea.hidden === false) return;
+
+    if (!lastSuccessfulSend) return;
+
+    const currentSendId = normalize(lastSuccessfulSend.sendId);
+
+    if (
+      !currentSendId ||
+      currentSendId === normalize(previousSendId) ||
+      Number(lastSuccessfulSend.successCount || 0) < 1
+    ) {
+      return;
+    }
+
+    const entries = Array.isArray(sourceEntries)
+      ? sourceEntries.filter(Boolean)
+      : [];
+
+    if (!entries.length) return;
+
+    const sendRecords = entries.map(function(entry) {
+      return buildBatchRecordData(entry);
+    });
+
+    const context = {
+      mode:"返却",
+      modeLabel:"返却",
+      sendId:currentSendId,
+      sentAt:lastSuccessfulSend.sentAt || new Date().toISOString(),
+      returnCaseId:normalize(returnCaseId),
+      batchMemo:normalize(returnMemo),
+      entries:entries,
+      records:sendRecords,
+      logIds:Array.isArray(lastSuccessfulSend.logIds)
+        ? lastSuccessfulSend.logIds.slice()
+        : []
+    };
+
+    console.info(
+      "開発版：イレギュラーマスタ返却の写真画面を補完します",
+      currentSendId
+    );
+
+    await beginWizardPostSendFlow(context);
+  }
+
+  if (typeof originalSendWizardBatch === "function") {
+    window.sendWizardBatch = async function(options) {
+      const shouldEnsureReturnPhoto =
+        wizardState.receptionType === "irregular" &&
+        wizardState.mode === "返却" &&
+        wizardReturnMemoConfirmed &&
+        Array.isArray(pendingIrregularReturnEntries) &&
+        pendingIrregularReturnEntries.length > 0;
+
+      const sourceEntries = shouldEnsureReturnPhoto
+        ? pendingIrregularReturnEntries.slice()
+        : [];
+      const previousSendId = lastSuccessfulSend
+        ? normalize(lastSuccessfulSend.sendId)
+        : "";
+      const returnMemo = shouldEnsureReturnPhoto
+        ? wizardReturnMemo
+        : "";
+      const returnCaseId = shouldEnsureReturnPhoto
+        ? wizardReturnCaseId
+        : "";
+
+      const accepted = await originalSendWizardBatch.apply(
+        this,
+        arguments
+      );
+
+      if (shouldEnsureReturnPhoto && accepted) {
+        await ensureIrregularReturnPhotoFlow(
+          sourceEntries,
+          previousSendId,
+          returnMemo,
+          returnCaseId
+        );
+
+        const photoArea = document.getElementById("wizardPhotoArea");
+        if (photoArea && photoArea.hidden === false) {
+          pendingIrregularReturnEntries = null;
+        }
+      }
+
+      return accepted;
+    };
   }
 
   installReturnMemoRestoreObserver();
@@ -256,9 +369,14 @@
       !wizardReturnMemoConfirmed;
 
     if (isReturnMemoStage) {
+      pendingIrregularReturnEntries = scannedEntries.slice();
       prepareReturnMemoHost();
       await sendWizardBatch();
       return false;
+    }
+
+    if (wizardState.mode !== "返却") {
+      pendingIrregularReturnEntries = null;
     }
 
     /*
@@ -271,6 +389,6 @@
   };
 
   console.info(
-    "開発版：イレギュラーマスタ送信ブリッジ v87 読込完了"
+    "開発版：イレギュラーマスタ送信ブリッジ v88 読込完了"
   );
 })();
