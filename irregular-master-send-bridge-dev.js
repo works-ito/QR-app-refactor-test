@@ -1,5 +1,5 @@
 /*
- * イレギュラー受付：マスタ選択 → 共通送信ブリッジ補強 v85
+ * イレギュラー受付：マスタ選択 → 共通送信ブリッジ補強 v86
  *
  * 目的：
  * - マスタ選択キューを通常QRと同じ scannedEntries / sendWizardBatch() へ渡す。
@@ -7,8 +7,8 @@
  * - マスタ選択後に旧「番号入力」画面へ戻らず、返却追記へそのまま進める。
  * - 出庫などの実送信では、送信受理直後にイレギュラー受付カードを先に閉じない。
  *   共通の beginWizardPostSendFlow() が次画面を開く直前に既存処理で閉じる。
- * - イレギュラー返却の追記画面だけを post-send 領域へ一時移動し、
- *   QRカメラ領域や通常側の取消ボタンを誤表示しない。
+ * - イレギュラー返却では、返却追記・共通送信ボタン・送信状態を1セットで
+ *   post-send 領域へ一時移動し、通常返却と同じ正規送信経路を使う。
  * - 同一レコードが既に staged 済みなら、同内容に限って再利用する。
  * - 数量・出庫取消は sourceQuantityLogId まで含めて同一性を判定する。
  * - 数量管理品の拠点移動は sourceLocation を共通送信レコードへ保持する。
@@ -47,22 +47,25 @@
   function restoreReturnMemoHost() {
     const memoArea =
       document.getElementById("wizardReturnMemoArea");
+    const sendButton =
+      document.getElementById("wizardSendBatchButton");
+    const sendStatus =
+      document.getElementById("wizardSendStatus");
     const cameraArea =
       document.getElementById("cameraPreview");
 
-    if (
-      memoArea &&
-      cameraArea &&
-      memoArea.parentElement !== cameraArea
-    ) {
-      const sendButton =
-        document.getElementById("wizardSendBatchButton");
+    if (!cameraArea) return;
 
-      if (sendButton && sendButton.parentElement === cameraArea) {
-        cameraArea.insertBefore(memoArea, sendButton);
-      } else {
-        cameraArea.appendChild(memoArea);
-      }
+    if (memoArea && memoArea.parentElement !== cameraArea) {
+      cameraArea.appendChild(memoArea);
+    }
+
+    if (sendButton && sendButton.parentElement !== cameraArea) {
+      cameraArea.appendChild(sendButton);
+    }
+
+    if (sendStatus && sendStatus.parentElement !== cameraArea) {
+      cameraArea.appendChild(sendStatus);
     }
   }
 
@@ -73,6 +76,10 @@
       document.getElementById("wizardPostSendArea");
     const memoArea =
       document.getElementById("wizardReturnMemoArea");
+    const sendButton =
+      document.getElementById("wizardSendBatchButton");
+    const sendStatus =
+      document.getElementById("wizardSendStatus");
     const cameraArea =
       document.getElementById("cameraPreview");
 
@@ -88,23 +95,23 @@
       postSendArea.hidden = false;
     }
 
-    if (
-      memoArea &&
-      postSendArea &&
-      memoArea.parentElement !== postSendArea
-    ) {
-      const postSendCancel =
-        document.getElementById("wizardPostSendCancelButton");
+    if (!postSendArea) return;
+
+    const postSendCancel =
+      document.getElementById("wizardPostSendCancelButton");
+
+    [memoArea, sendButton, sendStatus].forEach(function(node) {
+      if (!node || node.parentElement === postSendArea) return;
 
       if (
         postSendCancel &&
         postSendCancel.parentElement === postSendArea
       ) {
-        postSendArea.insertBefore(memoArea, postSendCancel);
+        postSendArea.insertBefore(node, postSendCancel);
       } else {
-        postSendArea.appendChild(memoArea);
+        postSendArea.appendChild(node);
       }
-    }
+    });
   }
 
   function installReturnMemoRestoreObserver() {
@@ -176,7 +183,7 @@
         const quantity = Number(selected.quantity);
 
         if (!Number.isInteger(quantity) || quantity < 1) {
-          alert("数量は1以上の整数で入力してください");
+          alert("数量は1以上の整数を入力してください");
           return false;
         }
 
@@ -264,6 +271,6 @@
   };
 
   console.info(
-    "開発版：イレギュラーマスタ送信ブリッジ v85 読込完了"
+    "開発版：イレギュラーマスタ送信ブリッジ v86 読込完了"
   );
 })();
