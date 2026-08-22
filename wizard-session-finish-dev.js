@@ -1,5 +1,5 @@
 /*
- * 受付セッション正常終了 v98
+ * 受付セッション正常終了 v99
  *
  * 目的：
  * - 1受付 = 1セッションとし、正常完了後にQRカメラへ自動復帰しない。
@@ -57,6 +57,10 @@
  * - 正常終了専用 finishWizardSession() を撤去。
  * - resumeWizardContinuousScan wrapper の正常終了分岐から stop→reset→入口描画まで直接実行し、
  *   wrapper→finish関数→reset の中継1段を削除。
+ *
+ * v99:
+ * - 正常終了時だけ使われていた closeIrregularMasterPicker() 専用関数を撤去。
+ * - ピッカー終了処理を正常終了分岐へ直接配置し、中継関数を1段削除。
  *
  * GASは変更しない。
  */
@@ -164,18 +168,6 @@
     button.hidden = false;
   }
 
-  function closeIrregularMasterPicker() {
-    const pickerPanel = document.getElementById("irregularMasterPickerPanel");
-    if (pickerPanel) pickerPanel.hidden = true;
-
-    const pickerRoot = document.getElementById("irregularMasterPickerDev");
-    if (pickerRoot) {
-      pickerRoot.querySelectorAll(".irregularMasterStep").forEach(function(step) {
-        step.hidden = true;
-      });
-    }
-  }
-
   function clearStaleWizardSendStatus() {
     const status = document.getElementById("wizardSendStatus");
     if (!status) return;
@@ -221,7 +213,16 @@
         resetWizard();
       }
 
-      closeIrregularMasterPicker();
+      const pickerPanel = document.getElementById("irregularMasterPickerPanel");
+      if (pickerPanel) pickerPanel.hidden = true;
+
+      const pickerRoot = document.getElementById("irregularMasterPickerDev");
+      if (pickerRoot) {
+        pickerRoot.querySelectorAll(".irregularMasterStep").forEach(function(step) {
+          step.hidden = true;
+        });
+      }
+
       renderEntranceCancelButton();
 
       try {
@@ -245,7 +246,7 @@
       }
     });
 
-    console.info("開発版：1受付1セッション v98 読込完了");
+    console.info("開発版：1受付1セッション v99 読込完了");
   }
 
   if (document.readyState === "loading") {
