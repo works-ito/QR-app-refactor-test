@@ -183,7 +183,7 @@
         const quantity = Number(selected.quantity);
 
         if (!Number.isInteger(quantity) || quantity < 1) {
-          alert("数量は1以上の整数を入力してください");
+          alert("数量は1以上の整数で入力してください");
           return false;
         }
 
@@ -264,7 +264,7 @@
     /*
      * v81で入れた onAccepted 即時非表示は使わない。
      * 送信中は現在のカードを維持し、
-     * beginWizardPostSendFlow() が写真・追記画面を開く直前に
+     * beginWizardPostSendFlow() が次画面を開く直前に
      * 既存 hideWizardPostSendCards() で切り替える。
      */
     return await sendWizardBatch();
