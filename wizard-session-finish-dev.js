@@ -1,5 +1,5 @@
 /*
- * 受付セッション正常終了 v100
+ * 受付セッション正常終了 v101
  *
  * 目的：
  * - 1受付 = 1セッションとし、正常完了後にQRカメラへ自動復帰しない。
@@ -66,6 +66,11 @@
  * - install() はロード順上1回だけ実行されるため entranceCancelTimer の保持・再clearを撤去。
  * - 入口取消ボタンは1秒setIntervalで常時更新されるため、visibilitychange の二重再描画を撤去。
  * - 入口取消表示の更新経路を1秒タイマーへ一本化。
+ *
+ * v101:
+ * - 取消期限の内部判定精度は維持したまま、UIの残り時間表示を分単位へ戻す。
+ * - 秒単位のカウントダウン表示を廃止し、利用者を不必要に焦らせない。
+ * - 表示更新も1分間隔に戻す。
  *
  * GASは変更しない。
  */
@@ -162,13 +167,16 @@
       return;
     }
 
-    const remainingMs = Math.max(0, Number(transaction.expiresAt || 0) - Date.now());
-    const remainingSec = Math.ceil(remainingMs / 1000);
-    const min = Math.floor(remainingSec / 60);
-    const sec = remainingSec % 60;
+    const remainingMs = Math.max(
+      0,
+      Number(transaction.expiresAt || 0) - Date.now()
+    );
+    const remainingMinutes = Math.ceil(remainingMs / 60000);
 
     button.textContent =
-      "直前送信を取消（残り " + min + ":" + String(sec).padStart(2, "0") + "）";
+      remainingMs < 60000
+        ? "直前送信を取消（有効時間：1分未満）"
+        : "直前送信を取消（残り約" + remainingMinutes + "分）";
     button.hidden = false;
   }
 
@@ -240,9 +248,9 @@
     installContinuousScanPatch();
 
     renderEntranceCancelButton();
-    setInterval(renderEntranceCancelButton, 1000);
+    setInterval(renderEntranceCancelButton, 60000);
 
-    console.info("開発版：1受付1セッション v100 読込完了");
+    console.info("開発版：1受付1セッション v101 読込完了");
   }
 
   if (document.readyState === "loading") {
