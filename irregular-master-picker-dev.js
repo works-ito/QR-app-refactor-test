@@ -9,7 +9,7 @@
 (function() {
   const STYLE_ID = "irregularMasterPickerDevStyle";
   const ROOT_ID = "irregularMasterPickerDev";
-  const MANAGED_PAGE_SIZE = 30;
+  const MANAGED_PAGE_SIZE = 40;
 
   const CATEGORY_ORDER = [
     "解体機械","発電機","溶接機","照明系","散水機","高圧洗浄機",
