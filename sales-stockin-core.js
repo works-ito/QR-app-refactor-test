@@ -1,5 +1,5 @@
 /*
- * 販売品入庫受付（開発版 v31）
+ * 販売品入庫受付（開発版 v32）
  * GAS側の「仕入入庫」と販売品出庫取消履歴選択は未接続。
  * このファイルでは販売品入庫UIと販売品作業制限のみ先行実装する。
  */
@@ -458,13 +458,16 @@
     entryButton.addEventListener("click", openSalesEntry);
   }
 
-  /*
-   * 入口ボタンが固定HTMLに存在していても、
-   * 販売品入庫パネルの初期化は続行する。
-   */
-  if (document.getElementById("salesStockInPanel")) return;
+    let panel =
+    document.getElementById("salesStockInPanel");
 
-  const panel = document.createElement("section");
+  /*
+   * 移行期間中は固定HTMLがまだ無い場合だけ
+   * 従来どおり販売品入庫パネルを生成する。
+   * 固定HTML化後は既存パネルをそのまま利用する。
+   */
+  if (!panel) {
+    panel = document.createElement("section");
     panel.id = "salesStockInPanel";
     panel.className = "panel";
     panel.innerHTML = `
@@ -533,7 +536,7 @@
     `;
 
     document.getElementById("receptionStep").insertAdjacentElement("afterend", panel);
-
+　　　}
     document.getElementById("salesStockInAddButton").addEventListener("click", addFromList);
     document.getElementById("salesStockInQrStartButton").addEventListener("click", startSalesQrScanner);
     document.getElementById("salesStockInQrAddButton").addEventListener("click", addDetectedQrItem);
