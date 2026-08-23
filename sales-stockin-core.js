@@ -480,21 +480,45 @@
   }
 
   function injectUi() {
-    injectStyle();
-    const receptionGrid = document.querySelector("#receptionStep .buttonGrid");
-    if (!receptionGrid || document.getElementById("salesStockInEntryButton")) return;
+  injectStyle();
 
-    const entryButton = document.createElement("button");
+  const receptionGrid =
+    document.querySelector("#receptionStep .buttonGrid");
+
+  if (!receptionGrid) return;
+
+  let entryButton =
+    document.getElementById("salesStockInEntryButton");
+
+  /*
+   * 移行期間中は、固定HTMLがまだ無い場合だけ
+   * 従来どおり入口ボタンを補完する。
+   * 固定HTML化後は既存ボタンへ動作だけ接続する。
+   */
+  if (!entryButton) {
+    entryButton = document.createElement("button");
     entryButton.id = "salesStockInEntryButton";
     entryButton.className = "choiceButton";
     entryButton.type = "button";
     entryButton.innerHTML =
       "販売品入庫受付" +
       '<span class="choiceSubText">仕入れた販売品の在庫を増やす</span>';
-    entryButton.addEventListener("click", openSalesEntry);
-    receptionGrid.appendChild(entryButton);
 
-    const panel = document.createElement("section");
+    receptionGrid.appendChild(entryButton);
+  }
+
+  if (entryButton.dataset.salesStockInBound !== "true") {
+    entryButton.dataset.salesStockInBound = "true";
+    entryButton.addEventListener("click", openSalesEntry);
+  }
+
+  /*
+   * 入口ボタンが固定HTMLに存在していても、
+   * 販売品入庫パネルの初期化は続行する。
+   */
+  if (document.getElementById("salesStockInPanel")) return;
+
+  const panel = document.createElement("section");
     panel.id = "salesStockInPanel";
     panel.className = "panel";
     panel.innerHTML = `
