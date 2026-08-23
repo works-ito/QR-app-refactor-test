@@ -1,5 +1,5 @@
 /*
- * イレギュラー受付：マスタ選択UI（開発版 v64）
+ * イレギュラー受付：マスタ選択UI（開発版 v65）
  *
  * GAS・既存送信処理は変更しない。
  * 管理番号候補は「簡易個体 → 個体 → REC → 軽量マスタ」の順で現在状態を優先し、
@@ -9,6 +9,7 @@
 (function() {
   const STYLE_ID = "irregularMasterPickerDevStyle";
   const ROOT_ID = "irregularMasterPickerDev";
+  const MANAGED_PAGE_SIZE = 30;
 
   const CATEGORY_ORDER = [
     "解体機械","発電機","溶接機","照明系","散水機","高圧洗浄機",
@@ -22,6 +23,8 @@
     item:null,
     pending:null,
     selectedManaged:new Map(),
+    managedRows:[],
+    managedPage:0,
     quantityCheckoutCandidates:[],
     selectedQuantityCheckout:null,
     queue:[]
@@ -197,6 +200,12 @@
       #${ROOT_ID} .irregularMasterChoice small{display:block;margin-top:3px;color:#64748b;font-size:11px;font-weight:600;line-height:1.35}
       #${ROOT_ID} .irregularMasterChoice.isSelected{border-color:#2563eb;background:#eff6ff;color:#1d4ed8;box-shadow:inset 0 0 0 1px #2563eb}
       #${ROOT_ID} .irregularMasterBack{width:100%;margin-top:10px}
+      #${ROOT_ID} .irregularMasterPager{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:8px;margin:10px 0}
+      #${ROOT_ID} .irregularMasterPager[hidden]{display:none!important}
+      #${ROOT_ID} .irregularMasterPagerButton{min-height:42px;padding:8px 10px;border:1px solid #93c5fd;border-radius:10px;background:#eff6ff;color:#1d4ed8;font-size:13px;font-weight:800}
+      #${ROOT_ID} .irregularMasterPagerButton:disabled{border-color:#dbe3ee;background:#f8fafc;color:#94a3b8;opacity:1}
+      #${ROOT_ID} .irregularMasterPagerInfo{min-width:78px;text-align:center;color:#64748b;font-size:11px;font-weight:700;line-height:1.35}
+      #${ROOT_ID} .irregularMasterPagerInfo strong{display:block;color:#0f172a;font-size:12px}
       #${ROOT_ID} .irregularMasterNotice{margin:10px 0;padding:10px 11px;border-radius:10px;background:#fff7ed;color:#9a3412;font-size:12px;line-height:1.55}
       #${ROOT_ID} .irregularMasterPreviewBox{margin-top:10px;padding:10px;border:1px dashed #94a3b8;border-radius:11px;background:#fff}
       #${ROOT_ID} .irregularMasterPreviewBox strong{display:block;margin-bottom:5px;font-size:13px}
@@ -230,6 +239,9 @@
         #${ROOT_ID} .irregularMasterPanel{padding:10px}
         #${ROOT_ID} .irregularMasterCategoryGrid{gap:2px}
         #${ROOT_ID} .irregularMasterCategoryGrid .irregularMasterChoice{min-height:42px;font-size:12px}
+        #${ROOT_ID} .irregularMasterPager{gap:6px}
+        #${ROOT_ID} .irregularMasterPagerButton{min-height:40px;padding:7px 8px;font-size:12px}
+        #${ROOT_ID} .irregularMasterPagerInfo{min-width:70px;font-size:10px}
       }
     `;
     document.head.appendChild(style);
@@ -301,6 +313,8 @@
   function renderCategories() {
     pickerState.category = "";
     pickerState.item = null;
+    pickerState.managedRows = [];
+    pickerState.managedPage = 0;
     clearManagedSelection();
     setCategoryBadge("");
     notice("");
@@ -323,6 +337,8 @@
   function renderItems(category) {
     pickerState.category = category;
     pickerState.item = null;
+    pickerState.managedRows = [];
+    pickerState.managedPage = 0;
     clearManagedSelection();
     setCategoryBadge(category);
     notice("");
@@ -382,32 +398,62 @@
     target.appendChild(box);
   }
 
-  function renderManagedIds(item) {
-    pickerState.item = item;
-    clearManagedSelection();
-    setCategoryBadge(item.category);
-    notice("");
-    showOnly("managedId");
+  function buildManagedPager(containerId, totalRows, totalPages, startIndex, endIndex) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.replaceChildren();
+    container.hidden = totalPages <= 1;
+    if (totalPages <= 1) return;
 
-    const title = document.getElementById("irregularMasterManagedTitle");
-    if (title) title.textContent = item.name;
+    const back = document.createElement("button");
+    back.type = "button";
+    back.className = "irregularMasterPagerButton";
+    back.textContent = "← 戻る";
+    back.disabled = pickerState.managedPage <= 0;
+    back.addEventListener("click", function(){
+      if (pickerState.managedPage <= 0) return;
+      pickerState.managedPage -= 1;
+      renderManagedIdPage(true);
+    });
 
+    const info = document.createElement("div");
+    info.className = "irregularMasterPagerInfo";
+    const strong = document.createElement("strong");
+    strong.textContent = (pickerState.managedPage + 1) + " / " + totalPages + "ページ";
+    const range = document.createElement("span");
+    range.textContent = totalRows + "件中 " + (startIndex + 1) + "〜" + endIndex + "件";
+    info.append(strong, range);
+
+    const next = document.createElement("button");
+    next.type = "button";
+    next.className = "irregularMasterPagerButton";
+    next.textContent = "次へ →";
+    next.disabled = pickerState.managedPage >= totalPages - 1;
+    next.addEventListener("click", function(){
+      if (pickerState.managedPage >= totalPages - 1) return;
+      pickerState.managedPage += 1;
+      renderManagedIdPage(true);
+    });
+
+    container.append(back, info, next);
+  }
+
+  function renderManagedIdPage(scrollToTop) {
+    const item = pickerState.item;
     const target = document.getElementById("irregularMasterIdGrid");
-    if (!target) return;
+    if (!item || !target) return;
+
+    const rows = Array.isArray(pickerState.managedRows) ? pickerState.managedRows : [];
+    const totalPages = Math.max(1, Math.ceil(rows.length / MANAGED_PAGE_SIZE));
+    if (pickerState.managedPage < 0) pickerState.managedPage = 0;
+    if (pickerState.managedPage >= totalPages) pickerState.managedPage = totalPages - 1;
+
+    const startIndex = pickerState.managedPage * MANAGED_PAGE_SIZE;
+    const endIndex = Math.min(startIndex + MANAGED_PAGE_SIZE, rows.length);
+    const pageRows = rows.slice(startIndex, endIndex);
     target.replaceChildren();
 
-    const rows = item.preview
-      ? [1,2,3].map(function(index){
-          return {managedId:"UI確認-"+String(index).padStart(4,"0"),status:"UI確認用",location:"",managementType:"preview"};
-        })
-      : managedIdsForMachine(item.code);
-
-    if (!rows.length) {
-      notice("この機種の管理番号候補を現在の初期データから取得できませんでした。直接入力を使用してください。");
-      return;
-    }
-
-    rows.forEach(function(row) {
+    pageRows.forEach(function(row) {
       const details = [row.location,row.status].filter(Boolean).join(" ／ ");
       const record = {
         type:"machine",
@@ -424,8 +470,54 @@
         toggleManagedSelection(record, button);
       });
       button.dataset.managedId = row.managedId;
+      if (pickerState.selectedManaged.has(row.managedId)) button.classList.add("isSelected");
       target.appendChild(button);
     });
+
+    buildManagedPager("irregularMasterPagerTop", rows.length, totalPages, startIndex, endIndex);
+    buildManagedPager("irregularMasterPagerBottom", rows.length, totalPages, startIndex, endIndex);
+
+    if (scrollToTop) {
+      const topPager = document.getElementById("irregularMasterPagerTop");
+      const anchor = topPager && !topPager.hidden ? topPager : document.getElementById("irregularMasterManagedTitle");
+      if (anchor) anchor.scrollIntoView({behavior:"smooth",block:"start"});
+    }
+  }
+
+  function renderManagedIds(item) {
+    pickerState.item = item;
+    clearManagedSelection();
+    pickerState.managedPage = 0;
+    setCategoryBadge(item.category);
+    notice("");
+    showOnly("managedId");
+
+    const title = document.getElementById("irregularMasterManagedTitle");
+    if (title) title.textContent = item.name;
+
+    const rows = item.preview
+      ? [1,2,3].map(function(index){
+          return {managedId:"UI確認-"+String(index).padStart(4,"0"),status:"UI確認用",location:"",managementType:"preview"};
+        })
+      : managedIdsForMachine(item.code);
+
+    pickerState.managedRows = rows;
+
+    const target = document.getElementById("irregularMasterIdGrid");
+    if (!target) return;
+    target.replaceChildren();
+
+    const topPager = document.getElementById("irregularMasterPagerTop");
+    const bottomPager = document.getElementById("irregularMasterPagerBottom");
+    if (topPager) { topPager.replaceChildren(); topPager.hidden = true; }
+    if (bottomPager) { bottomPager.replaceChildren(); bottomPager.hidden = true; }
+
+    if (!rows.length) {
+      notice("この機種の管理番号候補を現在の初期データから取得できませんでした。直接入力を使用してください。");
+      return;
+    }
+
+    renderManagedIdPage(false);
   }
 
   function toggleManagedSelection(record, button) {
@@ -493,6 +585,8 @@
     renderQueue();
     clearManagedSelection();
     pickerState.item = null;
+    pickerState.managedRows = [];
+    pickerState.managedPage = 0;
     renderCategories();
     const queue = document.getElementById("irregularMasterQueue");
     if (queue) queue.scrollIntoView({behavior:"smooth",block:"nearest"});
@@ -524,6 +618,8 @@
 
   async function renderQuantity(item) {
     pickerState.item = item;
+    pickerState.managedRows = [];
+    pickerState.managedPage = 0;
     pickerState.quantityCheckoutCandidates = [];
     pickerState.selectedQuantityCheckout = null;
     clearManagedSelection();
@@ -734,6 +830,8 @@
     renderQueue();
     clearManagedSelection();
     pickerState.item = null;
+    pickerState.managedRows = [];
+    pickerState.managedPage = 0;
     renderCategories();
     const queue = document.getElementById("irregularMasterQueue");
     if (queue) queue.scrollIntoView({behavior:"smooth",block:"nearest"});
@@ -796,6 +894,8 @@
     targetPanel.hidden = true;
     pickerState.category = "";
     pickerState.item = null;
+    pickerState.managedRows = [];
+    pickerState.managedPage = 0;
     clearManagedSelection();
   }
 
@@ -895,7 +995,9 @@
         <section class="irregularMasterStep" data-master-step="managedId" hidden>
           <p class="irregularMasterHint">管理番号を選んでください（複数選択可）</p>
           <div id="irregularMasterManagedTitle" class="irregularMasterPendingMain"></div>
+          <div id="irregularMasterPagerTop" class="irregularMasterPager" hidden></div>
           <div id="irregularMasterIdGrid" class="irregularMasterIdGrid"></div>
+          <div id="irregularMasterPagerBottom" class="irregularMasterPager" hidden></div>
           <div id="irregularMasterPending" class="irregularMasterPending" hidden>
             <div class="irregularMasterPendingTitle">選択中</div>
             <div id="irregularMasterPendingMain" class="irregularMasterPendingMain"></div>
