@@ -40,12 +40,25 @@
     </header>
 
     <div
-      id="inventoryDataStatus"
-      class="inventoryDataStatus isLoading"
-      aria-live="polite"
-    >
-      在庫データ：確認中
-    </div>
+  id="inventoryRefreshRowDev"
+  class="inventoryRefreshRowDev"
+>
+  <div
+    id="inventoryDataStatus"
+    class="inventoryDataStatus isLoading"
+    aria-live="polite"
+  >
+    在庫データ：確認中
+  </div>
+
+  <button
+    id="manualAppRefreshButtonDev"
+    class="manualAppRefreshButtonDev"
+    type="button"
+  >
+    更新
+  </button>
+</div>
 
     <div
       id="progress"
@@ -717,6 +730,6 @@
   <div id="inventoryRuntime" hidden></div>
   <script src="./scanner-try-harder-dev.js?v=49"></script>
   <script src="./app.js?v=66"></script>
-  <script src="./sales-stockin.js?v=115"></script>
+  <script src="./sales-stockin.js?v=116"></script>
 </body>
 </html>
