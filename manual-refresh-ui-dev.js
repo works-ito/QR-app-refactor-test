@@ -1,21 +1,20 @@
 /*
- * 手動更新UI v96
+ * 手動更新UI v97
  *
  * 責務：
- * - 既存の在庫データ表示と［更新］ボタンへ動作を接続する。
+ * - index.html に固定配置された在庫データ表示と［更新］ボタンへ動作を接続する。
  * - 通常時の件数表示は隠し、在庫キャッシュの updatedAt を
  *   yyyy/MM/dd HH:mm 形式で表示する。
  * - 更新ボタンはホーム画面追加版でも使えるよう、ページ全体を
  *   キャッシュバスター付きURLで再読込する。
  *
- * 移行期間中は、固定UIがまだHTMLに無い場合だけ旧方式で補完する。
- * 固定UIの実機確認後、この互換補完は撤去する。
+ * DOM生成は行わない。固定UIは index.html 側を正とする。
+ * 見た目のstyle生成はCSS正式移設まで一時的に残す。
  */
 (function() {
   "use strict";
 
   const STATUS_ID = "inventoryDataStatus";
-  const ROW_ID = "inventoryRefreshRowDev";
   const BUTTON_ID = "manualAppRefreshButtonDev";
 
   let renderingFromCache = false;
@@ -111,45 +110,16 @@
     document.head.appendChild(style);
   }
 
-  function ensureUi(status) {
-    let row = document.getElementById(ROW_ID);
-    let button = document.getElementById(BUTTON_ID);
-
-    /*
-     * 正式形では index.html に最初から存在する。
-     * 移行期間中だけ、旧HTMLでも壊れないよう補完する。
-     */
-    if (!row) {
-      row = document.createElement("div");
-      row.id = ROW_ID;
-      row.className = "inventoryRefreshRowDev";
-      status.parentNode.insertBefore(row, status);
-      row.appendChild(status);
-    }
-
-    if (!button) {
-      button = document.createElement("button");
-      button.id = BUTTON_ID;
-      button.className = "manualAppRefreshButtonDev";
-      button.type = "button";
-      button.textContent = "更新";
-      row.appendChild(button);
-    }
-
-    return {row:row, button:button};
-  }
-
   function install() {
     const status = document.getElementById(STATUS_ID);
-    if (!status) {
-      setTimeout(install, 300);
+    const button = document.getElementById(BUTTON_ID);
+
+    if (!status || !button) {
+      console.warn("手動更新UI：固定DOMが見つかりません");
       return;
     }
 
     ensureLegacyStyle();
-
-    const ui = ensureUi(status);
-    const button = ui.button;
 
     if (button.dataset.manualRefreshBound !== "true") {
       button.dataset.manualRefreshBound = "true";
@@ -172,7 +142,7 @@
       });
     }
 
-    console.info("開発版：手動更新UI v96 読込完了");
+    console.info("開発版：手動更新UI v97 読込完了");
   }
 
   if (document.readyState === "loading") {
