@@ -1,18 +1,14 @@
 /*
- * イレギュラー受付：マスタ選択 → 共通送信ブリッジ補強 v87
+ * イレギュラー受付：マスタ選択 → 共通送信ブリッジ補強 v88
  *
- * 目的：
+ * 責務：
  * - マスタ選択キューを通常QRと同じ scannedEntries / sendWizardBatch() へ渡す。
  * - 返却時、追記確認へ遷移した時点では送信完了扱いにしない。
- * - マスタ選択後に旧「番号入力」画面へ戻らず、返却追記へそのまま進める。
- * - 出庫などの実送信では、送信受理直後にイレギュラー受付カードを先に閉じない。
- *   共通の beginWizardPostSendFlow() が次画面を開く直前に既存処理で閉じる。
- * - イレギュラー返却では、返却追記・共通送信ボタン・送信状態を1セットで
- *   post-send 領域へ一時移動し、通常返却と同じ正規送信経路を使う。
  * - 同一レコードが既に staged 済みなら、同内容に限って再利用する。
  * - 数量・出庫取消は sourceQuantityLogId まで含めて同一性を判定する。
  * - 数量管理品の拠点移動は sourceLocation を共通送信レコードへ保持する。
  *
+ * 返却追記UIの配置管理は wizard-return-memo-host-dev.js に委譲する。
  * GASは変更しない。
  */
 (function() {
@@ -43,100 +39,6 @@
       normalize(existing.managementType) === normalize(candidate.managementType)
     );
   }
-
-  function restoreReturnMemoHost() {
-    const memoArea =
-      document.getElementById("wizardReturnMemoArea");
-    const sendButton =
-      document.getElementById("wizardSendBatchButton");
-    const sendStatus =
-      document.getElementById("wizardSendStatus");
-    const cameraArea =
-      document.getElementById("cameraPreview");
-
-    if (!cameraArea) return;
-
-    if (memoArea && memoArea.parentElement !== cameraArea) {
-      cameraArea.appendChild(memoArea);
-    }
-
-    if (sendButton && sendButton.parentElement !== cameraArea) {
-      cameraArea.appendChild(sendButton);
-    }
-
-    if (sendStatus && sendStatus.parentElement !== cameraArea) {
-      cameraArea.appendChild(sendStatus);
-    }
-  }
-
-  function prepareReturnMemoHost() {
-    const irregularArea =
-      document.getElementById("wizardIrregularArea");
-    const postSendArea =
-      document.getElementById("wizardPostSendArea");
-    const memoArea =
-      document.getElementById("wizardReturnMemoArea");
-    const sendButton =
-      document.getElementById("wizardSendBatchButton");
-    const sendStatus =
-      document.getElementById("wizardSendStatus");
-    const cameraArea =
-      document.getElementById("cameraPreview");
-
-    if (irregularArea) {
-      irregularArea.hidden = true;
-    }
-
-    if (cameraArea) {
-      cameraArea.classList.remove("isActive");
-    }
-
-    if (postSendArea) {
-      postSendArea.hidden = false;
-    }
-
-    if (!postSendArea) return;
-
-    const postSendCancel =
-      document.getElementById("wizardPostSendCancelButton");
-
-    [memoArea, sendButton, sendStatus].forEach(function(node) {
-      if (!node || node.parentElement === postSendArea) return;
-
-      if (
-        postSendCancel &&
-        postSendCancel.parentElement === postSendArea
-      ) {
-        postSendArea.insertBefore(node, postSendCancel);
-      } else {
-        postSendArea.appendChild(node);
-      }
-    });
-  }
-
-  function installReturnMemoRestoreObserver() {
-    const memoArea =
-      document.getElementById("wizardReturnMemoArea");
-
-    if (!memoArea || memoArea.dataset.masterBridgeObserved === "true") {
-      return;
-    }
-
-    memoArea.dataset.masterBridgeObserved = "true";
-
-    const observer = new MutationObserver(function() {
-      if (memoArea.hidden) {
-        restoreReturnMemoHost();
-      }
-    });
-
-    observer.observe(memoArea, {
-      attributes:true,
-      attributeFilter:["hidden"]
-    });
-  }
-
-  installReturnMemoRestoreObserver();
 
   window.sendIrregularMasterPickerBatch = async function(records) {
     if (!Array.isArray(records) || !records.length) {
@@ -256,21 +158,24 @@
       !wizardReturnMemoConfirmed;
 
     if (isReturnMemoStage) {
-      prepareReturnMemoHost();
+      if (
+        !window.wizardReturnMemoHost ||
+        typeof window.wizardReturnMemoHost.prepare !== "function"
+      ) {
+        console.error("返却追記UIホスト管理が読み込まれていません");
+        alert("返却画面の準備に失敗しました。画面を再読み込みしてください。");
+        return false;
+      }
+
+      window.wizardReturnMemoHost.prepare();
       await sendWizardBatch();
       return false;
     }
 
-    /*
-     * v81で入れた onAccepted 即時非表示は使わない。
-     * 送信中は現在のカードを維持し、
-     * beginWizardPostSendFlow() が次画面を開く直前に
-     * 既存 hideWizardPostSendCards() で切り替える。
-     */
     return await sendWizardBatch();
   };
 
   console.info(
-    "開発版：イレギュラーマスタ送信ブリッジ v87 読込完了"
+    "開発版：イレギュラーマスタ送信ブリッジ v88 読込完了"
   );
 })();
