@@ -144,6 +144,216 @@
         直前送信を取消（5分間有効）
       </button>
     </section>
+        <!-- 販売品入庫受付 -->
+    <section
+      id="salesStockInPanel"
+      class="panel"
+    >
+      <div class="stepHeader">
+        <div class="stepLabel">販売品入庫</div>
+
+        <div
+          class="receptionStatus"
+          style="background:#e8f5e9;color:#1b5e20;border-color:#a5d6a7;"
+        >
+          販売品入庫受付
+        </div>
+      </div>
+
+      <div
+        id="salesStockInTopStatus"
+        class="salesTopStatus"
+      ></div>
+
+      <div
+        class="salesStep"
+        data-sales-step="location"
+      >
+        <h1 class="question">
+          実施拠点を選んでください
+        </h1>
+
+        <p class="questionHint">
+          販売品を入庫する拠点を選択します
+        </p>
+
+        <div
+          id="salesStockInLocations"
+          class="buttonGrid singleColumn"
+        ></div>
+      </div>
+
+      <div
+        class="salesStep"
+        data-sales-step="user"
+      >
+        <h1 class="question">
+          担当者を選んでください
+        </h1>
+
+        <p class="questionHint">
+          今回の販売品入庫を登録する担当者を選択します
+        </p>
+
+        <div
+          id="salesStockInUsers"
+          class="buttonGrid"
+        ></div>
+      </div>
+
+      <div
+        class="salesStep"
+        data-sales-step="items"
+      >
+        <h1 class="question">
+          入庫する販売品を追加してください
+        </h1>
+
+        <p class="questionHint">
+          一覧またはQRから選び、数量を入力します。複数品目を続けて追加できます。
+        </p>
+
+        <div class="salesSectionCard">
+          <h2>一覧から追加</h2>
+
+          <p>
+            数量管理品マスタの「区分＝販売品」だけ表示します。
+          </p>
+
+          <select id="salesStockInItemSelect"></select>
+
+          <div class="salesInlineField">
+            <input
+              id="salesStockInQuantity"
+              type="number"
+              inputmode="numeric"
+              min="1"
+              step="1"
+              placeholder="数量"
+            >
+
+            <button
+              id="salesStockInAddButton"
+              type="button"
+            >
+              追加
+            </button>
+          </div>
+        </div>
+
+        <div class="salesSectionCard">
+          <h2>QRから追加</h2>
+
+          <p>
+            棚などの販売品QRを読んで品目を指定することもできます。
+          </p>
+
+          <button
+            id="salesStockInQrStartButton"
+            type="button"
+          >
+            販売品QRを読み取る
+          </button>
+
+          <div
+            id="salesStockInQrStatus"
+            class="wizardPostSummary"
+          >
+            QR読取は任意です
+          </div>
+
+          <div id="salesStockInQrViewport">
+            <video
+              id="salesStockInQrVideo"
+              playsinline
+              muted
+            ></video>
+          </div>
+
+          <div
+            id="salesStockInQrDetected"
+            class="wizardPostSummary"
+          ></div>
+
+          <div class="salesInlineField">
+            <input
+              id="salesStockInQrQuantity"
+              type="number"
+              inputmode="numeric"
+              min="1"
+              step="1"
+              placeholder="数量"
+            >
+
+            <button
+              id="salesStockInQrAddButton"
+              type="button"
+            >
+              追加
+            </button>
+          </div>
+        </div>
+
+        <div class="salesSectionCard">
+          <h2>追加済み</h2>
+
+          <div
+            id="salesStockInRows"
+            class="quantityInspectionRows"
+          ></div>
+        </div>
+
+        <button
+          id="salesStockInProceedButton"
+          class="nextButton"
+          type="button"
+          disabled
+        >
+          入庫確定へ進む
+        </button>
+      </div>
+
+      <div
+        class="salesStep"
+        data-sales-step="confirm"
+      >
+        <h1 class="question">
+          入庫内容を最終確認してください
+        </h1>
+
+        <p class="questionHint">
+          確定後は指定拠点の販売品在庫へ加算します。
+        </p>
+
+        <div
+          id="salesStockInConfirmSummary"
+          class="wizardPostSummary"
+        ></div>
+
+        <div id="salesStockInConfirmList"></div>
+
+        <button
+          id="salesStockInFinalButton"
+          class="wizardSendButton"
+          type="button"
+          disabled
+        >
+          この内容で入庫する
+        </button>
+
+        <div class="connectionNote">
+          開発版：GASの仕入入庫処理を接続後、このボタンを有効化します。
+        </div>
+
+        <button
+          id="salesStockInConfirmBackButton"
+          class="backButton salesBackButton"
+          type="button"
+        >
+          販売品追加へ戻る
+        </button>
+      </div>
+    </section>
     <section
   id="previousStep"
   class="panel"
