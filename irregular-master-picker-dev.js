@@ -1,5 +1,5 @@
 /*
- * イレギュラー受付：マスタ選択UI（開発版 v67）
+ * イレギュラー受付：マスタ選択UI（開発版 v68）
  *
  * GAS・既存送信処理は変更しない。
  * 管理番号候補は「簡易個体 → 個体 → REC → 軽量マスタ」の順で現在状態を優先し、
@@ -905,79 +905,6 @@
     document.getElementById("wizardIrregularArea");
 
   if (!irregularArea) return;
-
-  let container = root();
-
-  /*
-   * 移行期間中は固定HTMLがまだ無い場合だけ
-   * 従来どおりマスタ選択UIを生成する。
-   * 固定HTML化後は既存DOMへ動作だけ接続する。
-   */
-  if (!container) {
-    container = document.createElement("div");
-    container.id = ROOT_ID;
-    container.innerHTML = `
-      <p class="irregularMasterLead">QRがない・読めない場合は、マスタから対象を選べます。既存の直接入力・番号不明もそのまま使用できます。</p>
-      <button type="button" id="irregularMasterPickerOpenButton" class="choiceButton irregularMasterOpen">マスタから選ぶ<small>大分類 → 機種・品目 → 管理番号／数量</small></button>
-      <div id="irregularMasterPickerPanel" class="irregularMasterPanel" hidden>
-        <div class="irregularMasterTopline"><h4 class="irregularMasterStepTitle">マスタから選ぶ</h4><span id="irregularMasterSelectedCategory" class="irregularMasterSelectedCategory"></span></div>
-        <div id="irregularMasterNotice" class="irregularMasterNotice" hidden></div>
-        <section class="irregularMasterStep" data-master-step="category">
-          <p class="irregularMasterHint">大分類を選んでください</p><div id="irregularMasterCategoryGrid" class="irregularMasterCategoryGrid"></div>
-        </section>
-        <section class="irregularMasterStep" data-master-step="item" hidden>
-          <p class="irregularMasterHint">機種／品目を選んでください</p><div id="irregularMasterItemGrid" class="irregularMasterItemGrid"></div>
-          <button type="button" id="irregularMasterBackToCategory" class="secondaryButton irregularMasterBack">← 大分類へ戻る</button>
-        </section>
-        <section class="irregularMasterStep" data-master-step="managedId" hidden>
-          <p class="irregularMasterHint">管理番号を選んでください（複数選択可）</p>
-          <div id="irregularMasterManagedTitle" class="irregularMasterPendingMain"></div>
-          <div id="irregularMasterPagerTop" class="irregularMasterPager" hidden></div>
-          <div id="irregularMasterIdGrid" class="irregularMasterIdGrid"></div>
-          <div id="irregularMasterPagerBottom" class="irregularMasterPager" hidden></div>
-          <div id="irregularMasterPending" class="irregularMasterPending" hidden>
-            <div class="irregularMasterPendingTitle">選択中</div>
-            <div id="irregularMasterPendingMain" class="irregularMasterPendingMain"></div>
-            <div id="irregularMasterPendingSub" class="irregularMasterPendingSub"></div>
-            <button type="button" id="irregularMasterAddMachine" class="nextButton irregularMasterAddButton" data-managed-ids="[]">追加</button>
-          </div>
-          <button type="button" id="irregularMasterBackToItemFromId" class="secondaryButton irregularMasterBack">← 機種一覧へ戻る</button>
-        </section>
-        <section class="irregularMasterStep" data-master-step="quantity" hidden>
-          <p class="irregularMasterHint">数量を入力してください</p>
-          <div class="irregularMasterPending">
-            <div id="irregularMasterQuantityName" class="irregularMasterPendingMain"></div>
-            <div id="irregularMasterQuantitySub" class="irregularMasterPendingSub"></div>
-            <div id="irregularMasterQuantityCheckout" class="irregularMasterQuantityCheckout" hidden>
-              <label for="irregularMasterQuantityCheckoutSelect">取消対象の出庫履歴</label>
-              <select id="irregularMasterQuantityCheckoutSelect"></select>
-              <div id="irregularMasterQuantityCheckoutStatus" class="irregularMasterQuantityCheckoutStatus"></div>
-            </div>
-            <div class="irregularMasterQuantityField"><input id="irregularMasterQuantityValue" type="number" inputmode="numeric" min="1" step="1" placeholder="数量"><span id="irregularMasterQuantityUnit" class="irregularMasterQuantityUnit">個</span></div>
-            <button type="button" id="irregularMasterAddQuantity" class="nextButton irregularMasterAddButton">追加</button>
-          </div>
-          <button type="button" id="irregularMasterBackToItemFromQuantity" class="secondaryButton irregularMasterBack">← 品目一覧へ戻る</button>
-        </section>
-        <section id="irregularMasterQueue" class="irregularMasterQueue" hidden>
-          <div class="irregularMasterQueueHeader"><h4 class="irregularMasterQueueTitle">追加済み一覧</h4><span id="irregularMasterQueueCount" class="irregularMasterQueueCount">0件</span></div>
-          <div id="irregularMasterQueueList" class="irregularMasterQueueList"></div>
-          <div class="irregularMasterQueueActions"><button type="button" id="irregularMasterNextItem" class="secondaryButton irregularMasterNextItem">次の商品を追加</button><button type="button" id="irregularMasterBatchSend" class="nextButton irregularMasterBatchSend">まとめて送信</button></div>
-          <div class="irregularMasterUiOnly">通常QRと同じ送信・在庫確認・写真工程で処理します</div>
-        </section>
-        <button type="button" id="irregularMasterPickerCloseButton" class="secondaryButton irregularMasterBack">マスタ選択を閉じる</button>
-      </div>`;
-
-        const heading = irregularArea.querySelector("h3");
-
-    if (heading && heading.nextSibling) {
-      irregularArea.insertBefore(
-        container,
-        heading.nextSibling
-      );
-    } else {
-      irregularArea.prepend(container);
-    }
-  }
 
   document
     .getElementById("irregularMasterPickerOpenButton")
