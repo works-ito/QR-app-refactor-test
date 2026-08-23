@@ -1,12 +1,15 @@
 /*
- * 手動更新UI v95
+ * 手動更新UI v96
  *
- * - 在庫データ表示の右側に［更新］ボタンを追加する。
+ * 責務：
+ * - 既存の在庫データ表示と［更新］ボタンへ動作を接続する。
  * - 通常時の件数表示は隠し、在庫キャッシュの updatedAt を
  *   yyyy/MM/dd HH:mm 形式で表示する。
- * - 表示中の「2分前」等の相対文字列から日時を推測しない。
  * - 更新ボタンはホーム画面追加版でも使えるよう、ページ全体を
  *   キャッシュバスター付きURLで再読込する。
+ *
+ * 移行期間中は、固定UIがまだHTMLに無い場合だけ旧方式で補完する。
+ * 固定UIの実機確認後、この互換補完は撤去する。
  */
 (function() {
   "use strict";
@@ -40,7 +43,6 @@
 
     const text = String(status.textContent || "").trim();
 
-    /* 読込中・更新中・エラー表示はそのまま残す */
     if (
       text.indexOf("確認中") >= 0 ||
       text.indexOf("更新中") >= 0 ||
@@ -86,33 +88,11 @@
     window.location.replace(url.toString());
   }
 
-  function install() {
-    const status = document.getElementById(STATUS_ID);
-    if (!status) {
-      setTimeout(install, 300);
-      return;
-    }
-
-    if (document.getElementById(ROW_ID)) return;
-
-    const row = document.createElement("div");
-    row.id = ROW_ID;
-    row.className = "inventoryRefreshRowDev";
-
-    status.parentNode.insertBefore(row, status);
-    row.appendChild(status);
-
-    const button = document.createElement("button");
-    button.id = BUTTON_ID;
-    button.className = "manualAppRefreshButtonDev";
-    button.type = "button";
-    button.textContent = "更新";
-    button.addEventListener("click", function() {
-      runFullRefresh(button, status);
-    });
-    row.appendChild(button);
+  function ensureLegacyStyle() {
+    if (document.getElementById("manualRefreshLegacyStyle")) return;
 
     const style = document.createElement("style");
+    style.id = "manualRefreshLegacyStyle";
     style.textContent =
       ".inventoryRefreshRowDev{" +
         "display:flex;align-items:center;justify-content:space-between;" +
@@ -129,19 +109,70 @@
       ".manualAppRefreshButtonDev:active{transform:translateY(1px);background:#f4f6f8;}" +
       ".manualAppRefreshButtonDev:disabled{opacity:.65;}";
     document.head.appendChild(style);
+  }
+
+  function ensureUi(status) {
+    let row = document.getElementById(ROW_ID);
+    let button = document.getElementById(BUTTON_ID);
+
+    /*
+     * 正式形では index.html に最初から存在する。
+     * 移行期間中だけ、旧HTMLでも壊れないよう補完する。
+     */
+    if (!row) {
+      row = document.createElement("div");
+      row.id = ROW_ID;
+      row.className = "inventoryRefreshRowDev";
+      status.parentNode.insertBefore(row, status);
+      row.appendChild(status);
+    }
+
+    if (!button) {
+      button = document.createElement("button");
+      button.id = BUTTON_ID;
+      button.className = "manualAppRefreshButtonDev";
+      button.type = "button";
+      button.textContent = "更新";
+      row.appendChild(button);
+    }
+
+    return {row:row, button:button};
+  }
+
+  function install() {
+    const status = document.getElementById(STATUS_ID);
+    if (!status) {
+      setTimeout(install, 300);
+      return;
+    }
+
+    ensureLegacyStyle();
+
+    const ui = ensureUi(status);
+    const button = ui.button;
+
+    if (button.dataset.manualRefreshBound !== "true") {
+      button.dataset.manualRefreshBound = "true";
+      button.addEventListener("click", function() {
+        runFullRefresh(button, status);
+      });
+    }
 
     void renderLatestCacheTimestamp(status);
 
-    const observer = new MutationObserver(function() {
-      void renderLatestCacheTimestamp(status);
-    });
-    observer.observe(status, {
-      childList:true,
-      characterData:true,
-      subtree:true
-    });
+    if (status.dataset.manualRefreshObserved !== "true") {
+      status.dataset.manualRefreshObserved = "true";
+      const observer = new MutationObserver(function() {
+        void renderLatestCacheTimestamp(status);
+      });
+      observer.observe(status, {
+        childList:true,
+        characterData:true,
+        subtree:true
+      });
+    }
 
-    console.info("開発版：手動更新UI v95 読込完了");
+    console.info("開発版：手動更新UI v96 読込完了");
   }
 
   if (document.readyState === "loading") {
