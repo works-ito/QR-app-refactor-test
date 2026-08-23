@@ -1,5 +1,5 @@
 /*
- * イレギュラー受付：マスタ選択UI（開発版 v66）
+ * イレギュラー受付：マスタ選択UI（開発版 v67）
  *
  * GAS・既存送信処理は変更しない。
  * 管理番号候補は「簡易個体 → 個体 → REC → 軽量マスタ」の順で現在状態を優先し、
@@ -901,11 +901,20 @@
   }
 
   function injectUi() {
-    if (root()) return;
-    const irregularArea = document.getElementById("wizardIrregularArea");
-    if (!irregularArea) return;
+  const irregularArea =
+    document.getElementById("wizardIrregularArea");
 
-    const container = document.createElement("div");
+  if (!irregularArea) return;
+
+  let container = root();
+
+  /*
+   * 移行期間中は固定HTMLがまだ無い場合だけ
+   * 従来どおりマスタ選択UIを生成する。
+   * 固定HTML化後は既存DOMへ動作だけ接続する。
+   */
+  if (!container) {
+    container = document.createElement("div");
     container.id = ROOT_ID;
     container.innerHTML = `
       <p class="irregularMasterLead">QRがない・読めない場合は、マスタから対象を選べます。既存の直接入力・番号不明もそのまま使用できます。</p>
@@ -958,11 +967,21 @@
         <button type="button" id="irregularMasterPickerCloseButton" class="secondaryButton irregularMasterBack">マスタ選択を閉じる</button>
       </div>`;
 
-    const heading = irregularArea.querySelector("h3");
-    if (heading && heading.nextSibling) irregularArea.insertBefore(container,heading.nextSibling);
-    else irregularArea.prepend(container);
+        const heading = irregularArea.querySelector("h3");
 
-    document.getElementById("irregularMasterPickerOpenButton").addEventListener("click",openPicker);
+    if (heading && heading.nextSibling) {
+      irregularArea.insertBefore(
+        container,
+        heading.nextSibling
+      );
+    } else {
+      irregularArea.prepend(container);
+    }
+  }
+
+  document
+    .getElementById("irregularMasterPickerOpenButton")
+    .addEventListener("click", openPicker);
     document.getElementById("irregularMasterPickerCloseButton").addEventListener("click",closePicker);
     document.getElementById("irregularMasterBackToCategory").addEventListener("click",renderCategories);
     document.getElementById("irregularMasterBackToItemFromId").addEventListener("click",function(){renderItems(pickerState.category)});
