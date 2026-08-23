@@ -1,10 +1,11 @@
 /*
- * 返却追記UIホスト管理 v1
+ * 返却追記UIホスト管理 v2
  *
  * 責務：
- * - イレギュラー返却時、返却追記UIを post-send 領域へ移す。
+ * - イレギュラー返却時、返却追記UIと送信ボタンを post-send 領域へ移す。
  * - 返却追記終了後、元の cameraPreview 領域へ戻す。
  *
+ * wizardSendStatus は共通UIとして固定配置し、このホスト管理では移動しない。
  * 送信データ・GAS通信・写真フローには触れない。
  */
 (function() {
@@ -15,8 +16,6 @@
       document.getElementById("wizardReturnMemoArea");
     const sendButton =
       document.getElementById("wizardSendBatchButton");
-    const sendStatus =
-      document.getElementById("wizardSendStatus");
     const cameraArea =
       document.getElementById("cameraPreview");
 
@@ -29,10 +28,6 @@
     if (sendButton && sendButton.parentElement !== cameraArea) {
       cameraArea.appendChild(sendButton);
     }
-
-    if (sendStatus && sendStatus.parentElement !== cameraArea) {
-      cameraArea.appendChild(sendStatus);
-    }
   }
 
   function prepareReturnMemoHost() {
@@ -44,8 +39,6 @@
       document.getElementById("wizardReturnMemoArea");
     const sendButton =
       document.getElementById("wizardSendBatchButton");
-    const sendStatus =
-      document.getElementById("wizardSendStatus");
     const cameraArea =
       document.getElementById("cameraPreview");
 
@@ -66,7 +59,7 @@
     const postSendCancel =
       document.getElementById("wizardPostSendCancelButton");
 
-    [memoArea, sendButton, sendStatus].forEach(function(node) {
+    [memoArea, sendButton].forEach(function(node) {
       if (!node || node.parentElement === postSendArea) return;
 
       if (
@@ -109,5 +102,5 @@
 
   installReturnMemoRestoreObserver();
 
-  console.info("開発版：返却追記UIホスト管理 v1 読込完了");
+  console.info("開発版：返却追記UIホスト管理 v2 読込完了");
 })();
