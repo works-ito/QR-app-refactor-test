@@ -1,5 +1,5 @@
 /*
- * 手動更新UI v97
+ * 手動更新UI v98
  *
  * 責務：
  * - index.html に固定配置された在庫データ表示と［更新］ボタンへ動作を接続する。
@@ -8,8 +8,8 @@
  * - 更新ボタンはホーム画面追加版でも使えるよう、ページ全体を
  *   キャッシュバスター付きURLで再読込する。
  *
- * DOM生成は行わない。固定UIは index.html 側を正とする。
- * 見た目のstyle生成はCSS正式移設まで一時的に残す。
+ * DOM生成・style生成は行わない。
+ * 固定UIは index.html、見た目は styles.css を正とする。
  */
 (function() {
   "use strict";
@@ -87,29 +87,6 @@
     window.location.replace(url.toString());
   }
 
-  function ensureLegacyStyle() {
-    if (document.getElementById("manualRefreshLegacyStyle")) return;
-
-    const style = document.createElement("style");
-    style.id = "manualRefreshLegacyStyle";
-    style.textContent =
-      ".inventoryRefreshRowDev{" +
-        "display:flex;align-items:center;justify-content:space-between;" +
-        "gap:8px;margin-bottom:8px;" +
-      "}" +
-      ".inventoryRefreshRowDev #inventoryDataStatus{" +
-        "min-width:0;flex:1;margin:0;" +
-      "}" +
-      ".manualAppRefreshButtonDev{" +
-        "flex:0 0 auto;min-width:62px;min-height:34px;padding:6px 11px;" +
-        "border:1px solid #d9e0ea;border-radius:9px;background:#fff;" +
-        "color:#475467;font-size:13px;font-weight:800;" +
-      "}" +
-      ".manualAppRefreshButtonDev:active{transform:translateY(1px);background:#f4f6f8;}" +
-      ".manualAppRefreshButtonDev:disabled{opacity:.65;}";
-    document.head.appendChild(style);
-  }
-
   function install() {
     const status = document.getElementById(STATUS_ID);
     const button = document.getElementById(BUTTON_ID);
@@ -118,8 +95,6 @@
       console.warn("手動更新UI：固定DOMが見つかりません");
       return;
     }
-
-    ensureLegacyStyle();
 
     if (button.dataset.manualRefreshBound !== "true") {
       button.dataset.manualRefreshBound = "true";
@@ -142,7 +117,7 @@
       });
     }
 
-    console.info("開発版：手動更新UI v97 読込完了");
+    console.info("開発版：手動更新UI v98 読込完了");
   }
 
   if (document.readyState === "loading") {
