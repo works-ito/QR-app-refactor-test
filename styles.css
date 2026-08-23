@@ -1297,3 +1297,44 @@
   font-weight:800;
   line-height:1.45;
 }
+
+/* ===== 在庫データ手動更新UI ===== */
+
+.inventoryRefreshRowDev {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:8px;
+}
+
+.inventoryRefreshRowDev #inventoryDataStatus {
+  min-width:0;
+  flex:1;
+  margin:0;
+}
+
+.manualAppRefreshButtonDev {
+  flex:0 0 auto;
+  min-width:62px;
+  min-height:34px;
+  padding:6px 11px;
+
+  border:1px solid #d9e0ea;
+  border-radius:9px;
+
+  background:#fff;
+  color:#475467;
+
+  font-size:13px;
+  font-weight:800;
+}
+
+.manualAppRefreshButtonDev:active {
+  transform:translateY(1px);
+  background:#f4f6f8;
+}
+
+.manualAppRefreshButtonDev:disabled {
+  opacity:.65;
+}
