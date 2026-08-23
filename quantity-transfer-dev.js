@@ -1,4 +1,4 @@
-/* 数量管理品：拠点移動（受入先入力方式） v96 */
+/* 数量管理品：拠点移動（受入先入力方式） v97 */
 (function() {
   "use strict";
 
@@ -61,25 +61,6 @@
 
     box.append(label, hint, buttons, status);
     return box;
-  }
-
-  function injectStyle() {
-    if (document.getElementById("quantityTransferDevStyle")) return;
-    const style = document.createElement("style");
-    style.id = "quantityTransferDevStyle";
-    style.textContent = `
-      .quantityTransferSourceBox{margin:10px 0;padding:10px;border:1px solid #bfdbfe;border-radius:10px;background:#eff6ff}
-      .quantityTransferSourceBox[hidden]{display:none!important}
-      .quantityTransferSourceLabel{font-size:13px;font-weight:800;color:#1e3a8a}
-      .quantityTransferSourceHint{margin-top:3px;font-size:11px;line-height:1.45;color:#64748b}
-      .quantityTransferSourceButtons{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}
-      .quantityTransferSourceButton{min-height:48px;padding:7px 8px;border:1px solid #93c5fd;border-radius:9px;background:#fff;color:#0f172a;font-size:13px;font-weight:800}
-      .quantityTransferSourceButton small{display:block;margin-top:2px;color:#64748b;font-size:11px;font-weight:600}
-      .quantityTransferSourceButton.isSelected{border-color:#2563eb;background:#dbeafe;color:#1d4ed8;box-shadow:inset 0 0 0 1px #2563eb}
-      .quantityTransferSourceButton.isEmpty{opacity:.55}
-      .quantityTransferSourceStatus{margin-top:7px;font-size:11px;line-height:1.45;color:#475569}
-    `;
-    document.head.appendChild(style);
   }
 
   function renderSourceChoices(box, itemCode, selectedSource, onSelect) {
@@ -419,7 +400,6 @@
   }
 
   function init() {
-    injectStyle();
     ensureNormalBox();
     ensureIrregularBox();
     patchPreparedRecords();
