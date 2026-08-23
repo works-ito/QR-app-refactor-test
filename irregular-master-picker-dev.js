@@ -1,5 +1,5 @@
 /*
- * イレギュラー受付：マスタ選択UI（開発版 v65）
+ * イレギュラー受付：マスタ選択UI（開発版 v66）
  *
  * GAS・既存送信処理は変更しない。
  * 管理番号候補は「簡易個体 → 個体 → REC → 軽量マスタ」の順で現在状態を優先し、
@@ -983,7 +983,7 @@
     observer.observe(irregularArea,{attributes:true,attributeFilter:["hidden"]});
   }
 
-  function init(){injectStyle();injectUi();watchIrregularArea()}
+  function init(){injectUi();watchIrregularArea()}
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded",init,{once:true});
   else init();
 })();
