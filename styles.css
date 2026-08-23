@@ -1338,3 +1338,152 @@
 .manualAppRefreshButtonDev:disabled {
   opacity:.65;
 }
+/* ========================================
+   販売品入庫受付
+   ======================================== */
+
+#salesStockInEntryButton {
+  border-color: #2e7d32 !important;
+  background: #e8f5e9 !important;
+  color: #1b5e20 !important;
+}
+
+#salesStockInEntryButton .choiceSubText {
+  color: #2e7d32 !important;
+}
+
+#salesStockInPanel .salesStep {
+  display: none;
+}
+
+#salesStockInPanel .salesStep.isActive {
+  display: block;
+}
+
+#salesStockInPanel .salesTopStatus {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 0 0 14px;
+}
+
+#salesStockInPanel .salesChip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #e8f5e9;
+  color: #1b5e20;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+#salesStockInPanel .salesSectionCard {
+  margin-top: 16px;
+  padding: 14px;
+  border: 1px solid #d7e3d8;
+  border-radius: 12px;
+  background: #fff;
+}
+
+#salesStockInPanel .salesSectionCard h2 {
+  margin: 0 0 6px;
+  font-size: 17px;
+}
+
+#salesStockInPanel .salesSectionCard p {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: #666;
+  line-height: 1.55;
+}
+
+#salesStockInItemSelect {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 12px;
+  border: 1px solid #bbb;
+  border-radius: 10px;
+  background: #fff;
+  color: #111;
+  font-size: 16px;
+}
+
+#salesStockInPanel .salesInlineField {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  align-items: stretch;
+}
+
+#salesStockInPanel .salesInlineField input {
+  flex: 1;
+  min-width: 0;
+  min-height: 48px;
+  padding: 0 12px;
+  border: 1px solid #bbb;
+  border-radius: 10px;
+  font-size: 18px;
+}
+
+#salesStockInPanel .salesInlineField button {
+  min-width: 120px;
+}
+
+#salesStockInQrViewport {
+  display: none;
+  margin-top: 12px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+  aspect-ratio: 4 / 3;
+}
+
+#salesStockInQrViewport.isVisible {
+  display: block;
+}
+
+#salesStockInQrVideo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+#salesStockInRows {
+  margin-top: 14px;
+}
+
+#salesStockInRows:empty::before {
+  content: "まだ販売品は追加されていません。";
+  display: block;
+  padding: 14px;
+  text-align: center;
+  color: #777;
+  border: 1px dashed #c7c7c7;
+  border-radius: 10px;
+}
+
+#salesStockInConfirmList {
+  margin-top: 12px;
+}
+
+#salesStockInConfirmList .quantityInspectionRow {
+  margin-bottom: 8px;
+}
+
+#salesStockInProceedButton,
+#salesStockInFinalButton {
+  width: 100%;
+  margin-top: 18px;
+}
+
+#salesStockInFinalButton:disabled {
+  opacity: .55;
+}
+
+#salesStockInPanel .salesBackButton {
+  width: 100%;
+  margin-top: 10px;
+}
