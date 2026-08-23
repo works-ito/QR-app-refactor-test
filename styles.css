@@ -1487,3 +1487,440 @@
   width: 100%;
   margin-top: 10px;
 }
+
+/* ========================================
+   イレギュラー受付：マスタ選択UI
+   ======================================== */
+
+#irregularMasterPickerDev {
+  margin: 12px 0 18px;
+  padding: 0;
+}
+
+#irregularMasterPickerDev .irregularMasterLead {
+  margin: 0 0 10px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #64748b;
+}
+
+#irregularMasterPickerDev .irregularMasterOpen {
+  width: 100%;
+  min-height: 58px;
+  font-weight: 800;
+}
+
+#irregularMasterPickerDev .irregularMasterOpen small {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  font-weight: 600;
+  opacity: .72;
+}
+
+#irregularMasterPickerDev .irregularMasterPanel[hidden],
+#irregularMasterPickerDev .irregularMasterStep[hidden],
+#irregularMasterPickerDev .irregularMasterPending[hidden],
+#irregularMasterPickerDev .irregularMasterQueue[hidden] {
+  display: none !important;
+}
+
+#irregularMasterPickerDev .irregularMasterPanel {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid #d8dee6;
+  border-radius: 14px;
+  background: #f8fafc;
+}
+
+#irregularMasterPickerDev .irregularMasterTopline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 9px;
+}
+
+#irregularMasterPickerDev .irregularMasterStepTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+#irregularMasterPickerDev .irregularMasterSelectedCategory {
+  display: inline-flex;
+  align-items: center;
+  max-width: 70%;
+  min-height: 28px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #eaf2ff;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+#irregularMasterPickerDev .irregularMasterSelectedCategory:empty {
+  display: none;
+}
+
+#irregularMasterPickerDev .irregularMasterHint {
+  margin: 0 0 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #64748b;
+}
+
+#irregularMasterPickerDev .irregularMasterCategoryGrid {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+  gap: 2px;
+}
+
+#irregularMasterPickerDev .irregularMasterItemGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2px;
+}
+
+#irregularMasterPickerDev .irregularMasterIdGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+#irregularMasterPickerDev [data-master-step="category"] .irregularMasterHint,
+#irregularMasterPickerDev [data-master-step="item"] .irregularMasterHint {
+  margin-bottom: 7px;
+}
+
+#irregularMasterPickerDev .irregularMasterChoice {
+  width: 100%;
+  min-height: 52px;
+  padding: 10px 11px;
+  text-align: left;
+  border: 1px solid #cbd5e1;
+  border-radius: 11px;
+  background: #fff;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1.3;
+}
+
+#irregularMasterPickerDev .irregularMasterCategoryGrid .irregularMasterChoice {
+  min-height: 43px;
+  padding: 4px 6px;
+  text-align: center;
+  font-size: 13px;
+}
+
+#irregularMasterPickerDev .irregularMasterItemGrid .irregularMasterChoice {
+  min-height: 43px;
+  padding: 6px 8px;
+  font-size: 14px;
+}
+
+#irregularMasterPickerDev .irregularMasterChoice small {
+  display: block;
+  margin-top: 3px;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+#irregularMasterPickerDev .irregularMasterChoice.isSelected {
+  border-color: #2563eb;
+  background: #eff6ff;
+  color: #1d4ed8;
+  box-shadow: inset 0 0 0 1px #2563eb;
+}
+
+#irregularMasterPickerDev .irregularMasterBack {
+  width: 100%;
+  margin-top: 10px;
+}
+
+#irregularMasterPickerDev .irregularMasterPager {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto minmax(0,1fr);
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+#irregularMasterPickerDev .irregularMasterPager[hidden] {
+  display: none !important;
+}
+
+#irregularMasterPickerDev .irregularMasterPagerButton {
+  min-height: 42px;
+  padding: 8px 10px;
+  border: 1px solid #93c5fd;
+  border-radius: 10px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+#irregularMasterPickerDev .irregularMasterPagerButton:disabled {
+  border-color: #dbe3ee;
+  background: #f8fafc;
+  color: #94a3b8;
+  opacity: 1;
+}
+
+#irregularMasterPickerDev .irregularMasterPagerInfo {
+  min-width: 78px;
+  text-align: center;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+#irregularMasterPickerDev .irregularMasterPagerInfo strong {
+  display: block;
+  color: #0f172a;
+  font-size: 12px;
+}
+
+#irregularMasterPickerDev .irregularMasterNotice {
+  margin: 10px 0;
+  padding: 10px 11px;
+  border-radius: 10px;
+  background: #fff7ed;
+  color: #9a3412;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+#irregularMasterPickerDev .irregularMasterPreviewBox {
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px dashed #94a3b8;
+  border-radius: 11px;
+  background: #fff;
+}
+
+#irregularMasterPickerDev .irregularMasterPreviewBox strong {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 13px;
+}
+
+#irregularMasterPickerDev .irregularMasterPreviewActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+#irregularMasterPickerDev .irregularMasterPreviewButton {
+  min-height: 48px;
+  padding: 8px;
+  font-size: 12px;
+}
+
+#irregularMasterPickerDev .irregularMasterPending {
+  margin-top: 10px;
+  padding: 11px;
+  border-radius: 11px;
+  background: #fff;
+  border: 1px solid #dbe3ee;
+}
+
+#irregularMasterPickerDev .irregularMasterPendingTitle {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+#irregularMasterPickerDev .irregularMasterPendingMain {
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+#irregularMasterPickerDev .irregularMasterPendingSub {
+  margin-top: 3px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+#irregularMasterPickerDev .irregularMasterQuantityCheckout {
+  margin-top: 10px;
+  padding: 9px;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  background: #eff6ff;
+}
+
+#irregularMasterPickerDev .irregularMasterQuantityCheckout label {
+  display: block;
+  margin: 0 0 5px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+#irregularMasterPickerDev .irregularMasterQuantityCheckout select {
+  width: 100%;
+  min-height: 46px;
+  padding: 7px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 14px;
+}
+
+#irregularMasterPickerDev .irregularMasterQuantityCheckoutStatus {
+  margin-top: 6px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: #64748b;
+}
+
+#irregularMasterPickerDev .irregularMasterQuantityField {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+#irregularMasterPickerDev .irregularMasterQuantityField input {
+  min-width: 0;
+  width: 100%;
+  min-height: 48px;
+  font-size: 16px !important;
+}
+
+#irregularMasterPickerDev .irregularMasterQuantityUnit {
+  min-width: 34px;
+  text-align: left;
+  font-weight: 800;
+}
+
+#irregularMasterPickerDev .irregularMasterAddButton {
+  width: 100%;
+  min-height: 52px;
+  margin-top: 10px;
+  font-weight: 800;
+}
+
+#irregularMasterPickerDev .irregularMasterQueue {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #d8dee6;
+}
+
+#irregularMasterPickerDev .irregularMasterQueueHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+#irregularMasterPickerDev .irregularMasterQueueTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+#irregularMasterPickerDev .irregularMasterQueueCount {
+  font-size: 12px;
+  font-weight: 800;
+  color: #2563eb;
+}
+
+#irregularMasterPickerDev .irregularMasterQueueList {
+  display: grid;
+  gap: 7px;
+}
+
+#irregularMasterPickerDev .irregularMasterQueueRow {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border: 1px solid #dbe3ee;
+  border-radius: 10px;
+  background: #fff;
+}
+
+#irregularMasterPickerDev .irregularMasterQueueMain {
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+#irregularMasterPickerDev .irregularMasterQueueSub {
+  margin-top: 2px;
+  font-size: 11px;
+  color: #64748b;
+}
+
+#irregularMasterPickerDev .irregularMasterRemove {
+  min-width: 46px;
+  min-height: 38px;
+  padding: 6px 8px;
+  font-size: 12px;
+}
+
+#irregularMasterPickerDev .irregularMasterQueueActions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+#irregularMasterPickerDev .irregularMasterNextItem,
+#irregularMasterPickerDev .irregularMasterBatchSend {
+  width: 100%;
+  min-height: 52px;
+}
+
+#irregularMasterPickerDev .irregularMasterUiOnly {
+  margin-top: 7px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: #64748b;
+  text-align: center;
+}
+
+@media (max-width: 390px) {
+  #irregularMasterPickerDev .irregularMasterPanel {
+    padding: 10px;
+  }
+
+  #irregularMasterPickerDev .irregularMasterCategoryGrid {
+    gap: 2px;
+  }
+
+  #irregularMasterPickerDev .irregularMasterCategoryGrid .irregularMasterChoice {
+    min-height: 42px;
+    font-size: 12px;
+  }
+
+  #irregularMasterPickerDev .irregularMasterPager {
+    gap: 6px;
+  }
+
+  #irregularMasterPickerDev .irregularMasterPagerButton {
+    min-height: 40px;
+    padding: 7px 8px;
+    font-size: 12px;
+  }
+
+  #irregularMasterPickerDev .irregularMasterPagerInfo {
+    min-width: 70px;
+    font-size: 10px;
+  }
+}
